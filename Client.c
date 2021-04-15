@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 2223
+#define PORT 2224
 
 int main()
 {
