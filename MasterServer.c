@@ -1,12 +1,13 @@
 #include "Definitions.h"
 #include "Queue.h"
 #include <pthread.h>
+#include <wait.h>
 
 void server(int);
 int connectionWithClient(int *);
 void * threadFunc(void *);
 
-#define BASEPORT 2223
+#define BASEPORT 2224
 #define NUM_OF_SERVERS 1
 #define THREAD_NUM 5
 
@@ -154,14 +155,14 @@ void server(int portAdd)
 void * threadFunc(void *qp)
 {
     printf("Thread Created!\n");
+    printf("QUEUE: %p\n", qp);
 
-    struct queue *q = (struct queue *)qp;
+    struct queue *q;
+    q = (struct queue *)qp;
     
-
     int *socket;
     int s = -1;
     socket = &s;
-
     
     while(1)
     {
@@ -169,8 +170,12 @@ void * threadFunc(void *qp)
         socket = dequeue(q);
         pthread_mutex_unlock(&lock);
 
-        if(*socket != -1)
-            connectionWithClient(socket);
+        
+        if(*socket != -1){
+            printf("YOOOO: %d\n", *socket);
+            //printf("BOOBS");
+            //connectionWithClient(socket);
+        }
         
     }
 
