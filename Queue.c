@@ -27,7 +27,7 @@ int enqueue(struct queue *q, int *clientConnection)
 
 int * dequeue(struct queue *q)
 {
-    int *tbr;
+    int *tbr = malloc(sizeof(int));
 
     if(q->head == q->tail)
     {
