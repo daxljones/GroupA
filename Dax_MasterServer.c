@@ -250,7 +250,6 @@ int connectionWithClient(int *s)
 
         if(send(clientSocket, message, strlen(message), 0)  == -1)
         {
-            //printf("\n\n[-]Something Failed sending 1!\n\n");
             perror("Not working.");
             return -1;
         }
