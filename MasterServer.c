@@ -9,7 +9,7 @@ void * threadFunc(void *);
 
 #define BASEPORT 2224
 #define NUM_OF_SERVERS 1
-#define THREAD_NUM 5
+#define THREAD_NUM 1
 
 pthread_mutex_t lock;
 
@@ -132,11 +132,6 @@ void server(int portAdd)
         pthread_mutex_lock(&lock);
         enqueue(q, pclient);
         pthread_mutex_unlock(&lock);
-
-        /*pthread_t t;
-        int *pclient = malloc(sizeof(int));
-        *pclient = newSocket;
-        pthread_create(&t, NULL, connectionWithClient, pclient);*/
     }
 
     
@@ -155,12 +150,13 @@ void server(int portAdd)
 void * threadFunc(void *qp)
 {
     printf("Thread Created!\n");
-    printf("QUEUE: %p\n", qp);
 
     struct queue *q;
     q = (struct queue *)qp;
     
     int *socket;
+    int s;
+    socket = &s;
     
     while(1)
     {
@@ -168,10 +164,8 @@ void * threadFunc(void *qp)
         socket = dequeue(q);
         pthread_mutex_unlock(&lock);
 
-        
+        //printf("%d\n", *socket);
         if(*socket != -1){
-            //printf("YOOOO: %d\n", *socket);
-            printf("BOOBS");
             connectionWithClient(socket);
         }
 
@@ -186,32 +180,79 @@ void * threadFunc(void *qp)
 int connectionWithClient(int *s)
 {
     int clientSocket = *s;
-    free(s);
+    //free(s);
 
-    char buffer[256];
+    char menu[] = "Pick a number of choice:\n\n1. I'll say Hello\n2. I'll say Hey!\n3. I'll Exit\n"; //Menu Needs to be declared some where to send 
+    char userChoice[256];
+    int choice;
+    char message[256];
 
     while(1)
     {
-        memset(buffer, 0, sizeof(buffer));
-        if(recv(clientSocket, buffer, 256, 0)  == -1)
+        //====================================
+        //This is the loop the menu sending/recieving will go
+        //I've written a rough outline for how it should work
+        //=====================================
+
+
+        printf("Sending message...\n");
+        // Send menu
+        if(send(clientSocket, menu, strlen(menu), 0) == -1)
         {
-            printf("\n\nBalls\n\n");
+            printf("\n\n[-]Something Failed sending message!\n\n");
+        }
+                    
+
+        printf("Waiting to recieve...\n");
+        if(recv(clientSocket, userChoice, 256, 0)  == -1) //recieve client response
+        {
+            printf("\n\n[-]Something Failed Recieving!\n\n");
             return -1;
         }
         
-        fflush(stdout);
 
-        printf("Message: %s", buffer);
+        printf("Message: %s\n", userChoice);
+        choice = atoi(userChoice); //conversion of choice from string to int
+        printf("now its: %d\n", choice);
 
-        if(strcmp(buffer, "exit\n") == 0)
+        if(choice == 3)
         {
             break;
         }
 
-        char balls[256];
-        strcpy(balls, "I got your message!");
+        printf("Checking choice...\n");
 
-        send(clientSocket, balls, strlen(balls), 0);
+
+
+        //==============================
+        //Instead of sending messages back- each case need to call a function to handle the selected menu task
+        //================================
+        memset(message, 0, sizeof(message));
+        switch (choice)
+        {
+            case 1:
+                strcpy(message, "Hello!\n");
+                break;
+            
+            case 2:
+                strcpy(message, "Hey!\n");
+                break;
+            
+            default:
+                strcpy(message, "Whatever you entered was wrong.\n");
+                break;
+        }
+
+
+        if(send(clientSocket, message, strlen(message), 0)  == -1)
+        {
+            //printf("\n\n[-]Something Failed sending 1!\n\n");
+            perror("Not working.");
+            return -1;
+        }
+        printf("Sent my message!\n");
+        sleep(1);
+
     }
 
     close(clientSocket);

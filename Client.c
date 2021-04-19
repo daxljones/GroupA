@@ -41,24 +41,31 @@ int main()
     char input[256];
     char re[256];
 
-    do{
-        printf("Type message:\n");
-        fgets(input, sizeof(input), stdin);
-
-        send(clientSocket, input, strlen(input), 0);
-
-        if(strcmp(input, "exit\n") == 0)
+    while(1)
+    {
+        printf("recieving...\n");
+        memset(re, 0, sizeof(re));
+        if(recv(clientSocket, re, 256, 0)  == -1) //recieve client response
         {
-            printf("Goodbye!");
+            printf("\n\n[-]Something Failed Recieving!\n\n");
             exit(0);
         }
+        printf("this %s", re);
 
+        printf("Enter Something for server:\n");
+        fgets(input, sizeof(input), stdin);
+
+        printf("Sending...\n");
+        send(clientSocket, input, strlen(input) + 1, 0);
+
+        
+        printf("Recieving again...\n");
         recv(clientSocket, re, 256, 0);
 
         
-        printf("%s\n", re);
+        printf("that %s\n", re);
 
-    }while(1);
+    }
 
     return 0;
 }

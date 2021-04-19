@@ -40,6 +40,7 @@ int * dequeue(struct queue *q)
 
     q->head = (q->head + 1) % QUEUE_SIZE;
 
+
     return tbr;
 
 }
