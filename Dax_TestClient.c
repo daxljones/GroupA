@@ -1,3 +1,6 @@
+//to run: gcc -o clientStart Dax_TestClient.c
+//        ./clientStart
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -7,7 +10,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 2224
+#define PORT 2226
 
 int main()
 {

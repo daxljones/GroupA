@@ -11,8 +11,8 @@ int connectionWithClient(int *);
 void * threadFunc(void *);
 
 #define BASEPORT 2224
-#define NUM_OF_SERVERS 1
-#define THREAD_NUM 1
+#define NUM_OF_SERVERS 5
+#define THREAD_NUM 5
 
 pthread_mutex_t lock;
 
