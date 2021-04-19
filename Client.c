@@ -50,7 +50,7 @@ int main()
             printf("\n\n[-]Something Failed Recieving!\n\n");
             exit(0);
         }
-        printf("this %s", re);
+        printf("%s", re);
 
         printf("Enter Something for server:\n");
         fgets(input, sizeof(input), stdin);
@@ -63,7 +63,7 @@ int main()
         recv(clientSocket, re, 256, 0);
 
         
-        printf("that %s\n", re);
+        printf("%s\n", re);
 
     }
 
