@@ -189,13 +189,14 @@ int connectionWithClient(int *s)
 
     while(1)
     {
-        //====================================
+        //===================================================
         //This is the loop the menu sending/recieving will go
         //I've written a rough outline for how it should work
-        //=====================================
+        //===================================================
 
 
         printf("Sending message...\n");
+        
         // Send menu
         if(send(clientSocket, menu, strlen(menu), 0) == -1)
         {
@@ -224,9 +225,9 @@ int connectionWithClient(int *s)
 
 
 
-        //==============================
+        //=====================================================================================================
         //Instead of sending messages back- each case need to call a function to handle the selected menu task
-        //================================
+        //=====================================================================================================
         memset(message, 0, sizeof(message));
         switch (choice)
         {
