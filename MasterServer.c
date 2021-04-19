@@ -161,8 +161,6 @@ void * threadFunc(void *qp)
     q = (struct queue *)qp;
     
     int *socket;
-    int s = -1;
-    socket = &s;
     
     while(1)
     {
@@ -176,6 +174,8 @@ void * threadFunc(void *qp)
             printf("BOOBS");
             connectionWithClient(socket);
         }
+
+        free(socket);
         
     }
 
