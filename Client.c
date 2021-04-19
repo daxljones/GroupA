@@ -59,9 +59,10 @@ int main()
         send(clientSocket, input, strlen(input) + 1, 0);
 
         
+        memset(re, 0, sizeof(re));
         printf("Recieving again...\n");
         recv(clientSocket, re, 256, 0);
-
+        send(clientSocket, input, strlen(input) + 1, 0); 
         
         printf("%s\n", re);
 

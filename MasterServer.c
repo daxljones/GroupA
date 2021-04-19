@@ -251,10 +251,17 @@ int connectionWithClient(int *s)
             return -1;
         }
         printf("Sent my message!\n");
-        sleep(1);
+        
+        if(recv(clientSocket, userChoice, 256, 0)  == -1) //recieve client response
+        {
+            printf("\n\n[-]Something Failed Recieving!\n\n");
+            return -1;
+        }
 
     }
 
+    printf("Now leaving...\n\n");
+    
     close(clientSocket);
 
     return 1;
