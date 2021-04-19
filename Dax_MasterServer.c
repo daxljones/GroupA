@@ -1,7 +1,10 @@
+//To run: gcc -pthread -o start Dax_MasterServer.c Dax_Queue.c
+//        ./start
+
 #include "Definitions.h"
 #include "Queue.h"
 #include <pthread.h>
-//#include <wait.h>
+#include <wait.h>
 
 void server(int);
 int connectionWithClient(int *);
