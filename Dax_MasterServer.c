@@ -14,7 +14,12 @@ void * threadFunc(void *);
 #define NUM_OF_SERVERS 5
 #define THREAD_NUM 5
 
-pthread_mutex_t lock;
+pthread_mutex_t lock[NUM_OF_SERVERS];
+
+struct threadPackage{
+    struct queue *q;
+    int serverNum;
+};
 
 
 //==========================================
@@ -28,8 +33,11 @@ int main()
     int i = 0;
     pid_t pid;
 
-    if (pthread_mutex_init(&lock, NULL) != 0)
-        printf("Mutex init failed!\n");
+    for(i = 0; i < NUM_OF_SERVERS; i++)
+    {
+        if (pthread_mutex_init(&lock[i], NULL) != 0)
+            printf("Mutex init failed!\n");
+    }
 
     for(i = 0; i < NUM_OF_SERVERS; i++)
     {
@@ -59,12 +67,19 @@ void server(int portAdd)
     //----------------------------
     //Create Thread Pool and Queue
     //----------------------------
+    struct threadPackage *tp;
+    struct threadPackage package;
+    tp = &package;    
+
     pthread_t *pool = malloc(sizeof(pthread_t) * THREAD_NUM);
     struct queue *q = createQueue();
 
+    tp->serverNum = portAdd;
+    tp->q = q;
+
     for(int i = 0; i < THREAD_NUM; i++)
     {
-        pthread_create(&pool[i], NULL, threadFunc, q);
+        pthread_create(&pool[i], NULL, threadFunc, tp);
     }
 
 
@@ -132,9 +147,9 @@ void server(int portAdd)
         int *pclient = malloc(sizeof(int));
         *pclient = newSocket;
 
-        pthread_mutex_lock(&lock);
+        pthread_mutex_lock(&lock[portAdd]);
         enqueue(q, pclient);
-        pthread_mutex_unlock(&lock);
+        pthread_mutex_unlock(&lock[portAdd]);
     }
 
     
@@ -150,12 +165,12 @@ void server(int portAdd)
 //==========================================
 
 
-void * threadFunc(void *qp)
+void * threadFunc(void *package)
 {
     printf("Thread Created!\n");
 
-    struct queue *q;
-    q = (struct queue *)qp;
+    struct threadPackage *tp;
+    tp = (struct threadPackage *)package;
     
     int *socket;
     int s;
@@ -163,9 +178,9 @@ void * threadFunc(void *qp)
     
     while(1)
     {
-        pthread_mutex_lock(&lock);
-        socket = dequeue(q);
-        pthread_mutex_unlock(&lock);
+        pthread_mutex_lock(&lock[tp->serverNum]);
+        socket = dequeue(tp->q);
+        pthread_mutex_unlock(&lock[tp->serverNum]);
 
         //printf("%d\n", *socket);
         if(*socket != -1){
