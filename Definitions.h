@@ -10,6 +10,19 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <semaphore.h>
+#include <sys/ipc.h>
+#include "Queue.h"
+
+#define WRITE "/write"
+#define READ "/read"
+
+int readFile();
+void writeToFile();
+
+sem_t *write_sem;
+sem_t *read_sem;
+
+int var;
 
 
 struct Customer{

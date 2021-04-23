@@ -1,8 +1,9 @@
 //To run: gcc -pthread -o start Dax_MasterServer.c Dax_Queue.c
 //        ./start
 
+#include "Dax_Queue.c"
+#include "Dax_ReadWriteSync.c"
 #include "Definitions.h"
-#include "Queue.h"
 #include <pthread.h>
 //#include <wait.h>
 
@@ -13,6 +14,7 @@ void * threadFunc(void *);
 #define BASEPORT 2224
 #define NUM_OF_SERVERS 5
 #define THREAD_NUM 5
+
 
 pthread_mutex_t lock[NUM_OF_SERVERS];
 
@@ -30,14 +32,24 @@ int main()
 {
     printf("Master Server starting...\n\n");
 
+    var = 0;
+
     int i = 0;
     pid_t pid;
+
+    //set up semaphores
+    sem_unlink(WRITE);
+    sem_unlink(READ);
+
+    write_sem = sem_open(WRITE, IPC_CREAT, 0660, 1);
+    read_sem = sem_open(READ, IPC_CREAT, 0660, 1);
 
     for(i = 0; i < NUM_OF_SERVERS; i++)
     {
         if (pthread_mutex_init(&lock[i], NULL) != 0)
             printf("Mutex init failed!\n");
     }
+
 
     for(i = 0; i < NUM_OF_SERVERS; i++)
     {
@@ -49,6 +61,9 @@ int main()
     
 
     while(wait(NULL) != -1){;} 
+
+    sem_close(write_sem);
+    sem_close(read_sem);
 
 }
 
@@ -204,6 +219,7 @@ int connectionWithClient(int *s)
     char userChoice[256];
     int choice;
     char message[256];
+    int num = 0;
 
     while(1)
     {
@@ -230,9 +246,7 @@ int connectionWithClient(int *s)
         }
         
 
-        printf("Message: %s\n", userChoice);
         choice = atoi(userChoice); //conversion of choice from string to int
-        printf("now its: %d\n", choice);
 
         if(choice == 3)
         {
@@ -250,11 +264,14 @@ int connectionWithClient(int *s)
         switch (choice)
         {
             case 1:
-                strcpy(message, "Hello!\n");
+                num = readFile();
+                snprintf(message, 256, "The number is: %d", num);
                 break;
             
             case 2:
-                strcpy(message, "Hey!\n");
+                writeToFile();
+                num = readFile();
+                snprintf(message, 256, "The number i wrote is: %d", num);
                 break;
             
             default:
