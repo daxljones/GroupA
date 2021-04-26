@@ -1,0 +1,1018 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "passangerInformation.h"
+
+// GROUP A
+// AYRTON LEDESMA
+// ayrton.ledesma_fuentes@okstate.edu
+
+//Prototype functions
+void InquiryTicket();
+void MakingReservation();
+struct client passangerInformation();
+void MakeReservation();
+char* randomTicketGeneration(void);
+void CancelReservation();
+
+/*
+int main(int argc, char *argv[])
+{
+    //struct client customer;
+    //customer = passangerInformation();
+    //MakingReservation(&customer);
+
+    //InquiryTicket();
+    MakeReservation();
+
+    return 0;
+}
+*/
+
+void MakeReservation(){
+    struct client customer;
+    customer = passangerInformation();
+    char confirmation[10];
+
+    do{
+        printf("\n\nDo you want to make a reservation?(yes/no): ");
+        scanf(" %s", confirmation);
+        if(!strcmp(confirmation, "yes")){
+            printf("\n\nYour reservation is being processed...\n");
+            MakingReservation(&customer);
+            printf("\n\nYour reservation has been completed!\n");
+
+            break;
+        }
+
+        else if(!strcmp(confirmation, "no")){
+            printf("\n\nYour reservation has been canceled!\n");
+            break;
+        }
+
+        else {
+            printf("\nNot a valid confirmation. Please enter yes or no\n");
+        }
+
+    } while(1);
+}
+
+struct client passangerInformation(){
+    struct client customer;
+    printf("Enter name: \t\t");
+    scanf (" %[^\n]%*c", customer.name);
+    printf("Enter DOB: \t\t");
+    scanf(" %[^\n]%*c", customer.DOB);
+    printf("Enter gender: \t\t");
+    scanf (" %[^\n]%*c", customer.gender);
+    printf("Enter ID number: \t");
+    scanf(" %d", &customer.governmentIDNum);
+    printf("Number of Travelers:\t");
+    scanf(" %d", &customer.numOfTravelers);
+    printf("\nDate of travel (1 or 2):");
+    scanf(" %d", &customer.dateOfTravel);
+
+    return customer;
+}
+
+void InquiryTicket(){
+    char stateInfo[1000];
+    char line[1000];
+    FILE *fptr;
+
+    char *ticketNumber[10];
+    char *name[500];
+    char *DOB[10];
+    char *gender[10];
+    int idNumber;
+    int numOfTravelers;
+    char input[10];
+
+    int match;
+    int day;
+
+    if ((fptr = fopen("Day1.txt", "r")) == NULL) {
+        printf("Error! Could not open Day1.txt");
+        exit(1);
+    }
+
+    do {
+        match = 0;
+        //fgets(stateInfo, 1000, fptr);
+        printf("\n\tINQUIRY TICKET\n");
+        printf("\nTicket Number: ");
+        scanf(" %s", input);
+
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                //Add char function: Look for tickets chosen in Seats1_History
+                day = 1;
+                match = 1;
+                break;
+            }
+        }
+
+        if(match == 0){
+            if ((fptr = fopen("Day2.txt", "r")) == NULL) {
+                printf("Error! Could not open Day2.txt");
+                exit(1);
+            }
+
+            //fgets(stateInfo, 1000, fptr);
+
+            while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                if(!strcmp(ticketNumber, input)){
+                    //Add char function: Look for tickets chosen in Seats1_History
+                    day = 2;
+                    match = 1;
+                    break;
+                }
+            }
+        }
+
+        if(match != 0){
+            DisplayReservation(day, ticketNumber);
+            break;
+        }
+
+        else {
+            printf("\nCould not find ticket. Please try again!");
+            rewind(fptr);
+        }
+    } while(1);
+    fclose(fptr);
+}
+
+void MakingReservation(struct client *customer){
+    //Generate random ticket number, right now same ticket number for all of them
+    char *ticketPtr = randomTicketGeneration();
+    char ticketNumber[6];
+    strcpy(ticketNumber, ticketPtr);
+    ticketNumber[strlen(ticketNumber) + 1] = '\0';
+
+    //char ticketNumber[] = "OSU1234";
+
+    int dayOfTravel = customer->dateOfTravel;
+    if(dayOfTravel == 1){
+        FILE *f = fopen("Day1.txt", "a");
+        if (f == NULL)
+        {
+            printf("Error opening Day1.txt file!\n");
+            exit(1);
+        }
+
+        fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers);
+        fclose(f);
+    }
+
+    else if(dayOfTravel == 2){
+        FILE *f = fopen("Day2.txt", "a");
+        if (f == NULL)
+        {
+            printf("Error opening Day2.txt file!\n");
+            exit(1);
+        }
+
+        fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers);
+        fclose(f);
+    }
+
+    //Allow user to pick seats
+    SeatsAvailable(customer->numOfTravelers, ticketNumber, customer->dateOfTravel);
+    printf("\nYour ticket number is: %s", ticketNumber);
+
+    //Display final reservation
+    DisplayReservation(dayOfTravel, ticketNumber);
+}
+
+char* randomTicketGeneration(void)
+{
+    int randomizer = 0;
+
+    srand((unsigned int)(time(NULL)));
+
+    // Characters to generate random ticket
+    char numbers[] = "0123456789";
+    char letter[] = "abcdefghijklmnoqprstuvwyzx";
+    char LETTER[] = "ABCDEFGHIJKLMNOQPRSTUYWVZX";
+    char symbols[] = "!@#$^&*?";
+    static char ticket[6];
+
+    randomizer = rand() % 4;
+    for (int i = 0; i < 5; i++) {
+
+        if (randomizer == 1) {
+            ticket[i] = numbers[rand() % 10];
+            randomizer = rand() % 4;
+        }
+        else if (randomizer == 2) {
+            ticket[i] = symbols[rand() % 8];
+            randomizer = rand() % 4;
+        }
+        else if (randomizer == 3) {
+            ticket[i] = LETTER[rand() % 26];
+            randomizer = rand() % 4;
+        }
+        else {
+            ticket[i] = letter[rand() % 26];
+            randomizer = rand() % 4;
+        }
+    }
+    char *randomTicket = ticket;
+    return randomTicket;
+}
+
+
+//Only working for day 1 for now
+void CancelReservation(){
+    char stateInfo[1000];
+    char line[1000];
+    FILE *fptr, *fptr1, *fptr2, *fptr3;
+
+    char *ticketNumber[10];
+    char *name[500];
+    char *DOB[10];
+    char *gender[10];
+    int idNumber;
+    int numOfTravelers;
+    char input[10];
+
+    int day = 0;
+
+    int match;
+
+    if ((fptr = fopen("Day1.txt", "r")) == NULL) {
+        printf("Error! Could not open Day1.txt");
+        exit(1);
+    }
+
+    fptr1 = fopen("tmp.txt", "w");
+
+    do {
+        match = 0;
+        printf("\nTicket Number: ");
+        scanf(" %s", input);
+
+        if(input == "1"){
+            break;
+        }
+
+        //Look for ticket number in Day 1
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                match = 1;
+                day = 1;
+            }
+
+            else {
+                fprintf(fptr1, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+            }
+        }
+
+        if(match == 0){
+            fptr3 = fopen("tmp1.txt", "w");
+            //printf("\nDEBUG: Attempting to look in Day2.txt");
+            if ((fptr2 = fopen("Day2.txt", "r")) == NULL) {
+                printf("Error! Could not open Day2.txt trying to cancel reservation");
+                exit(1);
+            }
+            //printf("\nDEBUG2: Successfully opened Day2.txt");
+            while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                if(!strcmp(ticketNumber, input)){
+                    //printf("\nDEBUG3: Match found in Day 2, no copying line into tmp file");
+                    match = 1;
+                    day = 2;
+                }
+
+                else {
+                    //printf("\nDEBUG4: This line does not equal ticket, copying it into tmp.txt");
+                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                }
+            }
+        }
+
+        if(match == 1){
+            //Give seats back
+            //printf("\nInput before sending to remove seats: %s", input);
+
+            GiveSeatsBack(day, input);
+            RemoveSeats(day, input);
+
+            //printf("\nDEBUG: Match found after copying files, Exiting now");
+            break;
+        }
+        else {
+            printf("\nCouldn't find ticket number. Please try again! ");
+        }
+
+    } while(1);
+
+    if(day == 1){
+        fclose(fptr);
+        fclose(fptr1);
+        remove("Day1.txt");
+        rename("tmp.txt", "Day1.txt");
+    }
+
+    else if(day == 2){
+        fclose(fptr2);
+        fclose(fptr3);
+        remove("Day2.txt");
+        rename("tmp1.txt", "Day2.txt");
+    }
+    printf("\n\nYour reservation has been canceled!");
+}
+
+void ModifyReservation(){
+    int choice;
+    int choice2;
+    int numOfTravelersModified;
+    int operation;
+
+    FILE *fptr, *fptr2;
+    char *ticketNumber[10];
+    char *name[500];
+    char *DOB[10];
+    char *gender[10];
+    int idNumber;
+    int numOfTravelers;
+    char input[10];
+    int day = 0;
+
+    int match;
+
+    if ((fptr = fopen("Day1.txt", "r")) == NULL) {
+        printf("Error! Could not open Day1.txt");
+        exit(1);
+    }
+
+    printf("\n\n\tMODIFY RESERVATION\n");
+
+    do {
+        match = 0;
+        printf("\nTicket Number: ");
+        scanf(" %s", input);
+
+        //Look for ticket number in Day 1
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                match = 1;
+                day = 1;
+                break;
+            }
+        }
+
+        if(match == 0){
+            if ((fptr2 = fopen("Day2.txt", "r")) == NULL) {
+                printf("Error! Could not open Day2.txt trying to modify reservation");
+                exit(1);
+            }
+
+            while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                if(!strcmp(ticketNumber, input)){
+                    match = 1;
+                    day = 2;
+                    break;
+                }
+            }
+        }
+
+        if(match == 1){
+            break;
+        }
+
+        else {
+            printf("\nCouldn't find ticket number. Please try again! ");
+        }
+
+    } while(1);
+
+    printf("\n1. Change Seat");
+    printf("\n2. Change Travel Day");
+    printf("\n3. Change Number of Travelers\n");
+
+
+    printf("\nEnter option number: ");
+    //Add checker for correct input
+    scanf("%d", &choice);
+    //choice = 1;
+    switch(choice)
+    {
+        case 1:
+            //Change Seats
+            ChangeSeats(day, input);
+            break;
+
+        case 2:
+            //Change Travel Day
+            ChangeTravelDay(day, input, numOfTravelers);
+            break;
+
+        case 3:
+            //Change number of travelers
+            printf("\n\n1. Add Travelers");
+            printf("\n2. Remove Travelers");
+            printf("\n\nEnter option number: ");
+            scanf("%d", &choice2);
+
+            switch(choice2)
+            {
+                case 1:
+                    printf("\n\nPlease enter number of seats to add: ");
+                    scanf("%d", &numOfTravelersModified);
+                    operation = 1;
+                    ChangeNumberTravelers(day, input, numOfTravelersModified, operation);
+                    break;
+
+                case 2:
+                    printf("\n\nPlease enter number of seats to remove: ");
+                    scanf("%d", &numOfTravelersModified);
+                    //Remove seats operation
+                    operation = -1;
+                    ChangeNumberTravelers(day, input, numOfTravelersModified, operation);
+                    break;
+            }
+    }
+}
+
+void ChangeSeats(int day, char input[]){
+    char *ticketNumber[10];
+    int seatsFound = 0;
+    int seat;
+
+    if(day == 1){
+        FILE *fptr1;
+        //Open Seats_History2
+        if ((fptr1 = fopen("Seats1_History.txt", "r")) == NULL) {
+            printf("Error! Could not open Day1.txt");
+            exit(1);
+        }
+
+        while(fscanf(fptr1, "%s\t%d\n", ticketNumber, &seat) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                seatsFound++;
+            }
+        }
+
+        printf("\nNumber of seats initially purchased: %d", seatsFound);
+        //Removing original seats
+        GiveSeatsBack(day, input);
+        RemoveSeats(day, input);
+
+        printf("\nPlease enter the new seat number for each passanger");
+
+        //Allow user to pick new seats
+        SeatsAvailable(seatsFound, ticketNumber, day);
+
+        //Display final reservation
+        DisplayReservation(day, ticketNumber);
+    }
+
+    else if(day == 2){
+        FILE *fptr1;
+        //Open Seats_History2
+        if ((fptr1 = fopen("Seats2_History.txt", "r")) == NULL) {
+            printf("Error! Could not open Day1.txt");
+            exit(1);
+        }
+
+        while(fscanf(fptr1, "%s\t%d\n", ticketNumber, &seat) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                seatsFound++;
+            }
+        }
+
+        printf("\nNumber of seats initially purchased: %d", seatsFound);
+        //Removing original seats
+        GiveSeatsBack(day, input);
+        RemoveSeats(day, input);
+
+        printf("\nPlease enter the new seat number for each passanger");
+
+        //Allow user to pick new seats
+        SeatsAvailable(seatsFound, ticketNumber, day);
+
+        //Display final reservation
+        DisplayReservation(day, ticketNumber);
+    }
+    else {
+        printf("Error! Not a valid travel day - Change Seats");
+    }
+}
+
+void DisplayReservation(int day, char input[]){
+    FILE *fptr, *fptr1;
+    int seat;
+    int match = 0;
+
+    char *ticketNumber[10];
+    char *name[500];
+    char *DOB[10];
+    char *gender[10];
+    int idNumber;
+    int numOfTravelers;
+
+    if(day == 1){
+        if ((fptr = fopen("Day1.txt", "r")) == NULL) {
+            printf("Error! Could not open Day1.txt - DisplayReservation");
+            exit(1);
+        }
+
+        //Store all the information of the current customer
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                match = 1;
+                break;
+            }
+        }
+
+        if(match == 1){
+            if ((fptr1 = fopen("Seats1_History.txt", "r")) == NULL) {
+                printf("Error! Could not open Seats1_History.txt - DisplayReservation");
+                exit(1);
+            }
+
+            printf("\n\tRESERVATION INFO\n");
+            printf("\nTicket Number: \t%s", &ticketNumber);
+            printf("\nName:\t\t%s", &name);
+            printf("\nDOB:\t\t%s", &DOB);
+            printf("\nGender:\t\t%s", &gender);
+            printf("\nID Number:\t%d", idNumber);
+            printf("\nNum of Travels: %d", numOfTravelers);
+            printf("\nDay:\t\t%d", day);
+            printf("\nSeats:\t\t");
+
+            while(fscanf(fptr1, "%s\t%d\n", ticketNumber, &seat) != EOF){
+                if(!strcmp(ticketNumber, input)){
+                    printf("%d ", seat);
+                }
+            }
+        }
+
+        else {
+            printf("Something went wrong with the reservation...");
+        }
+
+        fclose(fptr);
+        fclose(fptr1);
+    }
+
+    else if(day == 2){
+        if ((fptr = fopen("Day2.txt", "r")) == NULL) {
+            printf("Error! Could not open Day2.txt - DisplayReservation");
+            exit(1);
+        }
+
+        //Store all the information of the current customer
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                match = 1;
+                break;
+            }
+        }
+
+        if(match == 1){
+            if ((fptr1 = fopen("Seats2_History.txt", "r")) == NULL) {
+                printf("Error! Could not open Seats2_History.txt - DisplayReservation");
+                exit(1);
+            }
+
+            printf("\n\tRESERVATION INFO\n");
+            printf("\nTicket Number: \t%s", &ticketNumber);
+            printf("\nName:\t\t%s", &name);
+            printf("\nDOB:\t\t%s", &DOB);
+            printf("\nGender:\t\t%s", &gender);
+            printf("\nID Number:\t%d", idNumber);
+            printf("\nNum of Travels: %d", numOfTravelers);
+            printf("\nDay:\t\t%d", day);
+            printf("\nSeats:\t\t");
+
+            while(fscanf(fptr1, "%s\t%d\n", ticketNumber, &seat) != EOF){
+                if(!strcmp(ticketNumber, input)){
+                    printf("%d ", seat);
+                }
+            }
+        }
+
+        else {
+            printf("\nSomething went wrong with the reservation...");
+        }
+
+        fclose(fptr);
+        fclose(fptr1);
+    }
+
+    else {
+        printf("\nNot a valid travel day");
+    }
+}
+
+void ChangeTravelDay(int day, char input[], int numTravelers){
+    //printf("\nDebug: Calling from ChangeTravel day");
+    //printf("\nValues received: \nDay: %d TicketNumber: %s Travelers: %d", day, input, numTravelers);
+
+    FILE *fptr1, *fptr2, *fptr3, *fptr4, *fptr5;
+    int currentSeat;
+    int availableSeats;
+    int seat;
+
+    char *ticketNumber[10];
+    char *name[500];
+    char *DOB[10];
+    char *gender[10];
+    int idNumber;
+    int numOfTravelers;
+
+    if(day == 1){
+        availableSeats = 20;
+        //Open available seats file for the other day
+        if ((fptr2 = fopen("Seats2.txt", "r")) == NULL) {
+            printf("\nError! Could not open Seats2.txt - ChangeTravelDay");
+            exit(1);
+        }
+
+        //Check how many seats are still available
+        while(fscanf(fptr2, "%d\n", &currentSeat) != EOF){
+            //If seat is taken
+            if(currentSeat == 0){
+                availableSeats--;
+            }
+        }
+
+        fclose(fptr2);
+
+        //printf("\nDebug available Seats: %d", availableSeats);
+
+        if(availableSeats < numTravelers){
+            printf("\nSorry! There are not enough seats for the other day. Couldn't change days");
+        }
+
+        else {
+            //Open file were reservation was originally made
+            if ((fptr1 = fopen("Day1.txt", "r")) == NULL) {
+                printf("\nError! Could not open Day1.txt - ChangeTravelDay");
+                exit(1);
+            }
+
+            //Look for original reservation
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                //When ticket is found
+                if(!strcmp(ticketNumber, input)){
+                    //Open other day file
+                    FILE *f = fopen("Day2.txt", "a");
+                    if (f == NULL){
+                        printf("Error opening Day2.txt file! - Change Travel day (day 1)\n");
+                        exit(1);
+                    }
+                    //Print reservation into other file
+                    fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fclose(f);
+                    break;
+                }
+            }
+
+            //REMOVING RESERVATION FROM INITIAL FILE
+            //Set pointer of day 1 to the beginning
+            rewind(fptr1);
+
+            //Open tmp file
+            fptr3 = fopen("tmp6.txt", "w");
+
+            //Scan for ticket number
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                //When ticket is found
+                if(!strcmp(ticketNumber, input)){
+                    //Do nothing
+                }
+                //Print the current information into tmp file
+                else {
+                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                }
+            }
+
+            fclose(fptr3);
+            fclose(fptr1);
+            remove("Day1.txt");
+            rename("tmp6.txt", "Day1.txt");
+
+            //REMOVE SEATS FROM ORIGINAL INITIAL SEATS FILE
+            GiveSeatsBack(day, input);
+            RemoveSeats(day, input);
+
+            //Switching days
+            day = 2;
+
+            //ALLOW USER TO PICK NEW SEATS - IN DAY 2
+            SeatsAvailable(numOfTravelers, ticketNumber, day);
+            DisplayReservation(day, input);
+        }
+    }
+
+    else if(day == 2){
+        availableSeats = 20;
+        //Open available seats file for the other day
+        if ((fptr2 = fopen("Seats1.txt", "r")) == NULL) {
+            printf("\nError! Could not open Seats1.txt - ChangeTravelDay");
+            exit(1);
+        }
+
+        //Check how many seats are still available
+        while(fscanf(fptr2, "%d\n", &currentSeat) != EOF){
+            //If seat is taken
+            if(currentSeat == 0){
+                availableSeats--;
+            }
+        }
+
+        fclose(fptr2);
+
+        //printf("\nDebug available Seats: %d", availableSeats);
+
+        if(availableSeats < numTravelers){
+            printf("\nSorry! There are not enough seats for the other day. Couldn't change days");
+        }
+
+        else {
+            //Open file were reservation was originally made
+            if ((fptr1 = fopen("Day2.txt", "r")) == NULL) {
+                printf("\nError! Could not open Day1.txt - ChangeTravelDay");
+                exit(1);
+            }
+
+            //Look for original reservation
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                //When ticket is found
+                if(!strcmp(ticketNumber, input)){
+                    //Open other day file
+                    FILE *f = fopen("Day1.txt", "a");
+                    if (f == NULL){
+                        printf("Error opening Day1.txt file! - Change Travel day (day 1)\n");
+                        exit(1);
+                    }
+                    //Print reservation into other file
+                    fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fclose(f);
+                    break;
+                }
+            }
+
+            //REMOVING RESERVATION FROM INITIAL FILE
+            //Set pointer of day 1 to the beginning
+            rewind(fptr1);
+
+            //Open tmp file
+            fptr3 = fopen("tmp7.txt", "w");
+
+            //Scan for ticket number
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                //When ticket is found
+                if(!strcmp(ticketNumber, input)){
+                    //Do nothing
+                }
+                //Print the current information into tmp file
+                else {
+                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                }
+            }
+
+            fclose(fptr3);
+            fclose(fptr1);
+            remove("Day2.txt");
+            rename("tmp7.txt", "Day2.txt");
+
+            //REMOVE SEATS FROM ORIGINAL INITIAL SEATS FILE
+            GiveSeatsBack(day, input);
+            RemoveSeats(day, input);
+
+            //Switching days
+            day = 1;
+
+            //ALLOW USER TO PICK NEW SEATS - IN DAY 2
+            SeatsAvailable(numOfTravelers, ticketNumber, day);
+            DisplayReservation(day, input);
+        }
+    }
+}
+
+void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int operation){
+    FILE *fptr1, *fptr2, *fptr3;
+
+    char *ticketNumber[10];
+    char *name[500];
+    char *DOB[10];
+    char *gender[10];
+    int idNumber;
+    int numOfTravelers;
+
+    int currentSeat;
+    int availableSeats;
+    int seat;
+    int valid = 0;
+
+
+    if(day == 1){
+        //If trying to add, make sure there are enough seats available
+        if(operation == 1){
+            availableSeats = 20;
+            //Open available seats file
+            if ((fptr1 = fopen("Seats1.txt", "r")) == NULL) {
+                printf("\nError! Could not open Seats1.txt - ChangeTravelDay");
+                exit(1);
+            }
+
+            //Check how many seats are still available
+            while(fscanf(fptr1, "%d\n", &currentSeat) != EOF){
+                //If seat is taken
+                if(currentSeat == 0){
+                    availableSeats--;
+                }
+            }
+            fclose(fptr1);
+
+            if(availableSeats < numOfTravelersModified){
+                printf("There are not enough seats to complete your request. Please try again.");
+            }
+
+            else {
+                //Modify reservation
+                if ((fptr2 = fopen("Day1.txt", "r")) == NULL) {
+                    printf("\nError! Could not open Day1.txt - Modify Reservation Add");
+                    exit(1);
+                }
+
+                fptr3 = fopen("tmp8.txt", "w");
+
+                while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                    if(!strcmp(ticketNumber, input)){
+                        //Change number of travelers
+                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers + numOfTravelersModified);
+                    }
+
+                    else {
+                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    }
+                }
+
+                fclose(fptr3);
+                fclose(fptr2);
+                remove("Day1.txt");
+                rename("tmp8.txt", "Day1.txt");
+
+                //Allow user to pick new seats
+                SeatsAvailable(numOfTravelersModified, input, day);
+                DisplayReservation(day, input);
+            }
+        }
+
+        else if(operation == -1){
+            //Open original reservation
+            if ((fptr1 = fopen("Day1.txt", "r")) == NULL) {
+                printf("\nError! Could not open Day1.txt - Modify Reservation Remove");
+                exit(1);
+            }
+
+            fptr2 = fopen("tmp9.txt", "w");
+
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                if(!strcmp(ticketNumber, input)){
+                    if((numOfTravelers - numOfTravelersModified) > 0){
+                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers - numOfTravelersModified);
+                        valid = 1;
+                    }
+                    else {
+                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                        printf("\nCouldn't modify reservation. Can't remove more seats than the ones that were originally purchased.");
+                    }
+                }
+
+                else {
+                    fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                }
+            }
+            fclose(fptr2);
+            fclose(fptr1);
+            remove("Day1.txt");
+            rename("tmp9.txt", "Day1.txt");
+
+            if(valid == 1){
+                //Remove as many seats as requested from Seats1_History
+                GiveSeatsBack(day, input);
+                RemoveSeats(day, input);
+
+                //ALLOW USER TO PICK NEW SEATS
+                SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day);
+                DisplayReservation(day, input);
+            }
+        }
+
+        else {
+            printf("\nNot valid operation");
+        }
+    }
+
+    else if (day == 2){
+        //If trying to add, make sure there are enough seats available
+        if(operation == 1){
+            availableSeats = 20;
+            //Open available seats file
+            if ((fptr1 = fopen("Seats2.txt", "r")) == NULL) {
+                printf("\nError! Could not open Seats2.txt - ChangeTravelDay");
+                exit(1);
+            }
+
+            //Check how many seats are still available
+            while(fscanf(fptr1, "%d\n", &currentSeat) != EOF){
+                //If seat is taken
+                if(currentSeat == 0){
+                    availableSeats--;
+                }
+            }
+            fclose(fptr1);
+
+            if(availableSeats < numOfTravelersModified){
+                printf("There are not enough seats to complete your request. Please try again.");
+            }
+
+            else {
+                //Modify reservation
+                if ((fptr2 = fopen("Day2.txt", "r")) == NULL) {
+                    printf("\nError! Could not open Day2.txt - Modify Reservation Add");
+                    exit(1);
+                }
+
+                fptr3 = fopen("tmp8.txt", "w");
+
+                while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                    if(!strcmp(ticketNumber, input)){
+                        //Change number of travelers
+                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers + numOfTravelersModified);
+                    }
+
+                    else {
+                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    }
+                }
+
+                fclose(fptr3);
+                fclose(fptr2);
+                remove("Day2.txt");
+                rename("tmp8.txt", "Day2.txt");
+
+                //Allow user to pick new seats
+                SeatsAvailable(numOfTravelersModified, input, day);
+                DisplayReservation(day, input);
+            }
+        }
+
+        else if(operation == -1){
+            //Open original reservation
+            if ((fptr1 = fopen("Day2.txt", "r")) == NULL) {
+                printf("\nError! Could not open Day1.txt - Modify Reservation Remove");
+                exit(1);
+            }
+
+            fptr2 = fopen("tmp9.txt", "w");
+
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                if(!strcmp(ticketNumber, input)){
+                    if((numOfTravelers - numOfTravelersModified) > 0){
+                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers - numOfTravelersModified);
+                        valid = 1;
+                    }
+                    else {
+                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                        printf("\nCouldn't modify reservation. Can't remove more seats than the ones that were originally purchased.");
+                    }
+                }
+
+                else {
+                    fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                }
+            }
+            fclose(fptr2);
+            fclose(fptr1);
+            remove("Day2.txt");
+            rename("tmp9.txt", "Day2.txt");
+
+            if(valid == 1){
+                //Remove as many seats as requested from Seats1_History
+                GiveSeatsBack(day, input);
+                RemoveSeats(day, input);
+
+                //ALLOW USER TO PICK NEW SEATS
+                SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day);
+                DisplayReservation(day, input);
+            }
+        }
+
+        else {
+            printf("\nNot valid operation");
+        }
+
+    }
+    else {
+        printf("\nDebug: Not a valid day to travel - Change number of travelers");
+    }
+}
+
