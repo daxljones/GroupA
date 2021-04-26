@@ -32,7 +32,7 @@ int main()
 {
     printf("Master Server starting...\n\n");
 
-    var = 0;
+    readerCount = 0;
 
     int i = 0;
     pid_t pid;
@@ -213,7 +213,6 @@ void * threadFunc(void *package)
 int connectionWithClient(int *s)
 {
     int clientSocket = *s;
-    //free(s);
 
     char menu[] = "Pick a number of choice:\n\n1. I'll say Hello\n2. I'll say Hey!\n3. I'll Exit\n"; //Menu Needs to be declared some where to send 
     char userChoice[256];
@@ -264,23 +263,20 @@ int connectionWithClient(int *s)
         switch (choice)
         {
             case 1:
-                num = readFile();
-                snprintf(message, 256, "The number is: %d", num);
+                
                 break;
             
             case 2:
-                writeToFile();
-                num = readFile();
-                snprintf(message, 256, "The number i wrote is: %d", num);
+            
                 break;
             
             default:
-                strcpy(message, "Whatever you entered was wrong.\n");
+      
                 break;
         }
 
 
-        if(send(clientSocket, message, strlen(message), 0)  == -1)
+        if(send(clientSocket, message, strlen(message), 0)  == -1) // take out these send recieve
         {
             perror("Not working.");
             return -1;

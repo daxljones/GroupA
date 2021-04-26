@@ -1,6 +1,6 @@
 #include "Definitions.h"
 
-static int readerCount = 0;
+
 
 int readFile()
 {
@@ -16,8 +16,6 @@ int readFile()
     //-----------------------------------------
     //This is the critical Section for reading
     //-----------------------------------------
-
-     send = var;
 
     wait(read_sem);
     readerCount--;
@@ -37,8 +35,6 @@ void writeToFile()
     // -----------------------------
     // Critical section for writing
     // -----------------------------
-    sleep(5);
-    var++;
 
     sem_post(write_sem);
 }

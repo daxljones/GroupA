@@ -22,7 +22,7 @@ void writeToFile();
 sem_t *write_sem;
 sem_t *read_sem;
 
-int var;
+static int readerCount;
 
 
 struct Customer{
