@@ -19,7 +19,8 @@ int main(int argc, char *argv[])
 }
 */
 
-void MakeReservation(){
+//Read
+void MakeReservation(){ 
     struct client customer;
     customer = passangerInformation();
     char confirmation[10];
@@ -47,6 +48,7 @@ void MakeReservation(){
     } while(1);
 }
 
+//Read 
 struct client passangerInformation(){
     struct client customer;
     printf("Enter name: \t\t");
@@ -65,6 +67,7 @@ struct client passangerInformation(){
     return customer;
 }
 
+//Reads ticket number
 void InquiryTicket(){
     char stateInfo[1000];
     char line[1000];
@@ -133,6 +136,7 @@ void InquiryTicket(){
     fclose(fptr);
 }
 
+//Writing
 void MakingReservation(struct client *customer){
     //Generate random ticket number, right now same ticket number for all of them
     char *ticketPtr = randomTicketGeneration();
@@ -175,6 +179,7 @@ void MakingReservation(struct client *customer){
     DisplayReservation(dayOfTravel, ticketNumber);
 }
 
+
 char* randomTicketGeneration(void)
 {
     int randomizer = 0;
@@ -212,8 +217,7 @@ char* randomTicketGeneration(void)
     return randomTicket;
 }
 
-
-//Only working for day 1 for now
+//Write
 void CancelReservation(){
     char stateInfo[1000];
     char line[1000];
@@ -313,6 +317,7 @@ void CancelReservation(){
     printf("\n\nYour reservation has been canceled!");
 }
 
+//Write
 void ModifyReservation(){
     int choice;
     int choice2;
@@ -425,6 +430,7 @@ void ModifyReservation(){
     }
 }
 
+//Write
 void ChangeSeats(int day, char input[]){
     char *ticketNumber[10];
     int seatsFound = 0;
@@ -490,6 +496,7 @@ void ChangeSeats(int day, char input[]){
     }
 }
 
+//Write
 void DisplayReservation(int day, char input[]){
     FILE *fptr, *fptr1;
     int seat;
@@ -597,6 +604,7 @@ void DisplayReservation(int day, char input[]){
     }
 }
 
+//Write
 void ChangeTravelDay(int day, char input[], int numTravelers){
     //printf("\nDebug: Calling from ChangeTravel day");
     //printf("\nValues received: \nDay: %d TicketNumber: %s Travelers: %d", day, input, numTravelers);
@@ -784,6 +792,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers){
     }
 }
 
+//Write
 void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int operation){
     FILE *fptr1, *fptr2, *fptr3;
 
