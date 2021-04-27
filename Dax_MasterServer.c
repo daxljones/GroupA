@@ -1,8 +1,7 @@
 //To run: gcc -pthread -o start Dax_MasterServer.c Dax_Queue.c
 //        ./start
 
-#include "Dax_Queue.c"
-#include "Dax_ReadWriteSync.c"
+
 #include "Definitions.h"
 #include <pthread.h>
 //#include <wait.h>
@@ -214,7 +213,7 @@ int connectionWithClient(int *s)
 {
     int clientSocket = *s;
 
-    char menu[] = "Pick a number of choice:\n\n1. I'll say Hello\n2. I'll say Hey!\n3. I'll Exit\n"; //Menu Needs to be declared some where to send 
+    char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program\n\nOption: "; //Menu Needs to be declared some where to send 
     char userChoice[256];
     int choice;
     char message[256];
@@ -262,16 +261,25 @@ int connectionWithClient(int *s)
         memset(message, 0, sizeof(message));
         switch (choice)
         {
-            case 1:
-                
+             case 1:
+                MakeReservation();
                 break;
-            
+
             case 2:
-            
+                InquiryTicket();
                 break;
-            
+
+            case 3:
+                ModifyReservation();
+                break;
+
+            case 4:
+                CancelReservation();
+                break;
+            case 5:
+                return 0;
             default:
-      
+                //put error message here;
                 break;
         }
 

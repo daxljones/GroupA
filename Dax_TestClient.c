@@ -46,7 +46,6 @@ int main()
 
     while(1)
     {
-        printf("recieving...\n");
         memset(re, 0, sizeof(re));
         if(recv(clientSocket, re, 256, 0)  == -1) //recieve client response
         {
@@ -55,19 +54,10 @@ int main()
         }
         printf("%s", re);
 
-        printf("Enter Something for server:\n");
         fgets(input, sizeof(input), stdin);
 
-        printf("Sending...\n");
+        printf("\nSending...\n");
         send(clientSocket, input, strlen(input) + 1, 0);
-
-        
-        memset(re, 0, sizeof(re));
-        printf("Recieving again...\n");
-        recv(clientSocket, re, 256, 0);
-        printf("Recived: %s", re);
-
-        send(clientSocket, input, strlen(input) + 1, 0); 
 
     }
 

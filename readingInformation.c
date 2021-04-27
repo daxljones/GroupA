@@ -1,20 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "passangerInformation.h"
-
 // GROUP A
 // AYRTON LEDESMA
 // ayrton.ledesma_fuentes@okstate.edu
 
-//Prototype functions
-void InquiryTicket();
-void MakingReservation();
-struct client passangerInformation();
-void MakeReservation();
-char* randomTicketGeneration(void);
-void CancelReservation();
+#include "Definitions.h"
+
 
 /*
 int main(int argc, char *argv[])

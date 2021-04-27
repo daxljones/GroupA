@@ -1,13 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "passangerInformation.h"
+#include "Definitions.h"
 
 //Prototype functions
-void TrackSeatChosen(char ticketNumber[], int seatPicked, int dayOfTravel);
-void SeatsAvailable(int seatsPurchased, char ticketNumber[], int dayOfTravel);
-void ChooseSeat(int seatPicked, int dayOfTravel);
-void DisplaySeats(int dayOfTravel);
+
 
 /*
 int main(int argc, char *argv[])

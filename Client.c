@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
                     case 4:
                         CancelReservation();
                         break;
+                    
                 }
             }
         }
