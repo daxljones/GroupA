@@ -20,7 +20,7 @@ int main()
 
 
 void RemoveSeats(int day, char input[]){
-    char *ticketNumber[10];
+    char ticketNumber[10];
     //printf("\nCalling from Remove Seats");
     //printf("\nInput received: %s Length: %d", input, strlen(input));
 
@@ -90,7 +90,7 @@ void RemoveSeats(int day, char input[]){
 }
 
 void GiveSeatsBack(int day, char input[]){
-    char *ticketNumber[10];
+    char ticketNumber[10];
 
     if(day == 1){
         FILE *fptr1, *fptr2, *fptr3;

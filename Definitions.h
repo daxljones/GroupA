@@ -12,6 +12,7 @@
 #include <semaphore.h>
 #include <sys/ipc.h>
 #include <time.h>
+#include <sys/wait.h>
 #include "Queue.h"
 
 
