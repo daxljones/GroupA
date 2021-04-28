@@ -200,7 +200,6 @@ void * threadFunc(void *package)
         if(*socket != -1)
         {
             connectionWithClient(socket);
-            printf("---It screwed up---\n\n");
         }
         free(socket);
         
@@ -237,7 +236,6 @@ int connectionWithClient(int *s)
         switch (choice)
         {
              case 1:
-                printf("Client picked Option 1!\n");
                 MakeReservation(clientSocket);
                 break;
 
@@ -253,9 +251,11 @@ int connectionWithClient(int *s)
                 CancelReservation(clientSocket);
                 break;
             case 5:
+                sendMessage("exit", clientSocket);
+                sendMessage("\n\nGoodbye!\n", clientSocket);
                 return 0;
             default:
-                //put error message here;
+                sendMessage("Please enter a valid option.\n", clientSocket);
                 break;
         }
 

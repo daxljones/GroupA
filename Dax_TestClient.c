@@ -56,15 +56,19 @@ int main()
                 exit(0);
             }
 
-            fflush(stdout);
-            printf("%s", re);
 
-            if(strcmp(re, "input") == 0) //Server needs user input
+            if(strcmp(re, "input") == 0 || strcmp(re, "exit") == 0) //Server needs user input
             {
                 break;
             }
 
-            
+            fflush(stdout);
+            printf("%s", re);
+        }
+
+        if(strcmp(re, "exit") == 0)
+        {
+            break;
         }
 
         printf("\n");
@@ -81,6 +85,8 @@ int main()
         printf("\nSending...\n");
 
     }
+
+    printf("\n\n[+] Client Closing.\n\n");
 
     return 0;
 }
