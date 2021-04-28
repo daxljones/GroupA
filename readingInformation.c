@@ -19,63 +19,6 @@ int main(int argc, char *argv[])
 }
 */
 
-//Read 
-struct client passangerInformation(int clientSocket){
-    struct client customer;
-    char *confirmation;
-    char message[256];
-
-
-    sprintf(message, "Enter name: \t\t");
-    sendMessage(message, clientSocket);
-    //scanf (" %[^\n]%*c", customer.name);
-    memset(confirmation, '\0', sizeof(confirmation));
-    confirmation = clientInput(clientSocket);
-    sprintf(customer.name, " %[^\n]%*c", confirmation);
-
-    memset(&message, '\0', sizeof(message));
-    sprintf(message, "Enter DOB: \t\t");
-    sendMessage(message, clientSocket);
-    //scanf(" %[^\n]%*c", customer.DOB);
-    memset(confirmation, '\0', sizeof(confirmation));
-    confirmation = clientInput(clientSocket);
-    sprintf(customer.DOB, " %[^\n]%*c", confirmation);
-
-    memset(&message, '\0', sizeof(message));
-    sprintf(message, "Enter gender: \t\t");
-    sendMessage(message, clientSocket);
-    //scanf (" %[^\n]%*c", customer.gender);
-    memset(confirmation, '\0', sizeof(confirmation));
-    confirmation = clientInput(clientSocket);
-    sprintf(customer.gender, " %[^\n]%*c", confirmation);
-
-    memset(&message, '\0', sizeof(message));
-    sprintf(message, "Enter ID number: \t");
-    sendMessage(message, clientSocket);
-    //scanf(" %d", &customer.governmentIDNum);
-    memset(confirmation, '\0', sizeof(confirmation));
-    confirmation = clientInput(clientSocket);
-    customer.governmentIDNum = atoi(confirmation);
-
-    memset(&message, '\0', sizeof(message));
-    sprintf(message, "Number of Travelers:\t");
-    sendMessage(message, clientSocket);
-    //scanf(" %d", &customer.numOfTravelers);
-    memset(confirmation, '\0', sizeof(confirmation));
-    confirmation = clientInput(clientSocket);
-    customer.numOfTravelers = atoi(confirmation);
-
-    memset(&message, '\0', sizeof(message));
-    sprintf(message, "\nDate of travel (1 or 2):");
-    sendMessage(message, clientSocket);
-    //scanf(" %d", &customer.dateOfTravel);
-    memset(confirmation, '\0', sizeof(confirmation));
-    confirmation = clientInput(clientSocket);
-    customer.dateOfTravel = atoi(confirmation);
-
-    free(confirmation);
-    return customer;
-}
 
 //Read
 void MakeReservation(int clientSocket){ 
@@ -123,6 +66,64 @@ void MakeReservation(int clientSocket){
     free(confirmation);
 }
 
+//Read 
+struct client passangerInformation(int clientSocket){
+    struct client customer;
+    char *confirmation;
+    char message[256];
+
+
+    sprintf(message, "Enter name: \t\t");
+    sendMessage(message, clientSocket);
+    //scanf (" %[^\n]%*c", customer.name);
+    free(confirmation);
+    printf("back from freeing\n\n");
+    confirmation = clientInput(clientSocket);
+    strcpy(customer.name, confirmation);
+    
+    sprintf(message, "Enter DOB: \t\t");
+    sendMessage(message, clientSocket);
+    //scanf(" %[^\n]%*c", customer.DOB);
+    free(confirmation);
+    confirmation = clientInput(clientSocket);
+    sprintf(customer.DOB, " %[^\n]%*c", confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "Enter gender: \t\t");
+    sendMessage(message, clientSocket);
+    //scanf (" %[^\n]%*c", customer.gender);
+    free(confirmation);
+    confirmation = clientInput(clientSocket);
+    sprintf(customer.gender, " %[^\n]%*c", confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "Enter ID number: \t");
+    sendMessage(message, clientSocket);
+    //scanf(" %d", &customer.governmentIDNum);
+    free(confirmation);
+    confirmation = clientInput(clientSocket);
+    customer.governmentIDNum = atoi(confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "Number of Travelers:\t");
+    sendMessage(message, clientSocket);
+    //scanf(" %d", &customer.numOfTravelers);
+    free(confirmation);
+    confirmation = clientInput(clientSocket);
+    customer.numOfTravelers = atoi(confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "\nDate of travel (1 or 2):");
+    sendMessage(message, clientSocket);
+    //scanf(" %d", &customer.dateOfTravel);
+    free(confirmation);
+    confirmation = clientInput(clientSocket);
+    customer.dateOfTravel = atoi(confirmation);
+
+    free(confirmation);
+    return customer;
+}
+
 
 //Reads ticket number
 void InquiryTicket(int clientSocket){
@@ -145,8 +146,7 @@ void InquiryTicket(int clientSocket){
     int day;
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
-        memset(&message, '\0', sizeof(message));
-        sprintf(message, "Error! Could not open Day1.txt");
+        printf("Error! Could not open Day1.txt");
         exit(1);
     }
 

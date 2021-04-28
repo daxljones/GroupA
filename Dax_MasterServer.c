@@ -197,10 +197,11 @@ void * threadFunc(void *package)
         pthread_mutex_unlock(&lock[tp->serverNum]);
 
         //printf("%d\n", *socket);
-        if(*socket != -1){
+        if(*socket != -1)
+        {
             connectionWithClient(socket);
+            printf("---It fucked up---\n\n");
         }
-
         free(socket);
         
     }
@@ -213,7 +214,7 @@ int connectionWithClient(int *s)
 {
     int clientSocket = *s;
 
-    char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program\n\nOption: "; //Menu Needs to be declared some where to send 
+    char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program"; //Menu Needs to be declared some where to send 
     char *userChoice;
     int choice;
     char message[256];
@@ -223,6 +224,7 @@ int connectionWithClient(int *s)
     {   
         // Send menu
         sendMessage(menu, clientSocket);
+        sendMessage("\n\nOption:\n", clientSocket);
 
         userChoice = clientInput(clientSocket);
         
@@ -268,7 +270,7 @@ int connectionWithClient(int *s)
 
 void sendMessage(char *message, int clientSocket)
 {
-    if(send(clientSocket, message, strlen(message), 0) == -1)
+    if(send(clientSocket, message, strlen(message) + 1, 0) == -1)
     {
         printf("\n\n[-]Something Failed sending message!\n\n");
     }
@@ -279,12 +281,15 @@ char * clientInput(int clientSocket)
 {
     char *clientResponse = malloc(sizeof(char) * 256);
 
-    wait(3);
+    sleep(2);
 
-    if(send(clientSocket, "input", strlen("input"), 0) == -1)
+    if(send(clientSocket, "input", strlen("input") + 1, 0) == -1)
     {
         printf("\n\n[-]Something Failed sending message!\n\n");
     }  
+
+    
+
     if(recv(clientSocket, clientResponse, 256, 0)  == -1) //recieve client response
     {
         printf("\n\n[-]Something Failed Recieving!\n\n");
@@ -292,5 +297,17 @@ char * clientInput(int clientSocket)
     }
 
 
+    printf("recieved: %s\n\n", clientResponse);
+
+    char c;
+
+    for(int i = 0; i < 256; ++i)
+    {
+        c = clientResponse[i];
+        printf("Char: %c\n", c);
+    }
+
     return clientResponse;
 }
+
+

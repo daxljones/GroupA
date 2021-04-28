@@ -36,6 +36,7 @@ void InquiryTicket(int);
 void MakingReservation(struct client *, int);
 void ModifyReservation(int);
 void MakeReservation(int);
+struct client passangerInformation(int);
 char* randomTicketGeneration(void);
 void CancelReservation(int);
 void GiveSeatsBack(int, char *);
