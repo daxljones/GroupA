@@ -38,7 +38,7 @@ void SeatsAvailable(int seatsPurchased, char ticketNumber[], int dayOfTravel, in
         sendMessage(message, clientSocket);
 
         ChooseSeat(seatPicked, dayOfTravel);
-        TrackSeatChosen(ticketNumber, seatPicked, dayOfTravel);
+        TrackSeatChosen(ticketNumber, seatPicked, dayOfTravel, clientSocket);
         count++;
 
         //Repeat until all seats have been selected
@@ -47,7 +47,7 @@ void SeatsAvailable(int seatsPurchased, char ticketNumber[], int dayOfTravel, in
     DisplaySeats(dayOfTravel, clientSocket);
 }
 
-void TrackSeatChosen(char ticketNumber[], int seatPicked, int dayOfTravel){
+void TrackSeatChosen(char ticketNumber[], int seatPicked, int dayOfTravel, int clientSocket){
     if(dayOfTravel == 1){
         FILE *f = fopen("Seats1_History.txt", "a");
         if (f == NULL)
@@ -72,7 +72,10 @@ void TrackSeatChosen(char ticketNumber[], int seatPicked, int dayOfTravel){
         fclose(f);
     }
     else {
-        printf("Invalid day");
+        //printf("Invalid day");
+        char message[256];
+        sprintf(message, "Invalid day\n");
+        sendMessage(message, clientSocket);
         exit(1);
     }
 }
@@ -150,6 +153,7 @@ void DisplaySeats(int dayOfTravel, int clientSocket){
         memset(&message, '\0', sizeof(message));
         sprintf(message, "\n\t");
         sendMessage(message, clientSocket);
+        
         while(fscanf(fptr, "%d\n", &currentSeat) != EOF)
         {
             if(rowCounter == rows){

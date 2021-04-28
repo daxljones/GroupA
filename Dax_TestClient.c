@@ -67,6 +67,8 @@ int main()
             
         }
 
+        printf("\n");
+
         fgets(input, sizeof(input), stdin);
 
         printf("\ngoing to send.\n");
