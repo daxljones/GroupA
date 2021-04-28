@@ -643,6 +643,8 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
     char message[256];
 
+    printf("\n\n--Input: %s--\n", input);
+
 
     if(day == 1){
         if ((fptr = fopen("Day1.txt", "r")) == NULL) {
