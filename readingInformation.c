@@ -305,14 +305,13 @@ void CancelReservation(int clientSocket){
     char *gender[10];
     int idNumber;
     int numOfTravelers;
-    int input;
 
     int day = 0;
 
     int match;
 
     char message[256];
-    char *userInput;
+    char *input;
     
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
@@ -328,9 +327,7 @@ void CancelReservation(int clientSocket){
         sprintf(message, "\nTicket Number: ");
         sendMessage(message, clientSocket);
 
-        userInput = clientInput(clientSocket);
-
-        input = atoi(userInput);
+        input = clientInput(clientSocket);
 
         if(input == "1"){
             break;
@@ -405,7 +402,7 @@ void CancelReservation(int clientSocket){
     sprintf(message, "\n\nYour reservation has been canceled!");
     sendMessage(message, clientSocket);
 
-    free(userInput);
+    free(input);
 }
 
 //Write
@@ -639,7 +636,7 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
     char *ticketNumber[10];
     char *name[50];
-    char *DOB[50];
+    char *DOB[10];
     char *gender[10];
     int idNumber;
     int numOfTravelers;
