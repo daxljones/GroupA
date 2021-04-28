@@ -446,7 +446,7 @@ void ModifyReservation(int clientSocket){
         sprintf(message, "\nTicket Number: ");
         sendMessage(message, clientSocket);
 
-        input = clientInput(clientSocket);//", input);
+        input = clientInput(clientSocket);
 
         //Look for ticket number in Day 1
         while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
