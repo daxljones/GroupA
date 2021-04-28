@@ -21,13 +21,13 @@ int main(int argc, char *argv[])
 
 
 //Read
-void MakeReservation(int clientSocket){ 
+void MakeReservation(int clientSocket){
     struct client customer;
     customer = passangerInformation(clientSocket);
     char *confirmation;
 
     char message[256];
-    
+
 
     do{
         memset(&message, '\0', sizeof(message));
@@ -60,7 +60,7 @@ void MakeReservation(int clientSocket){
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nNot a valid confirmation. Please enter yes or no\n");
             sendMessage(message, clientSocket);
-            free(confirmation); 
+            free(confirmation);
         }
 
     } while(1);
@@ -68,7 +68,7 @@ void MakeReservation(int clientSocket){
     free(confirmation);
 }
 
-//Read 
+//Read
 struct client passangerInformation(int clientSocket){
     struct client customer;
     char *confirmation;
@@ -82,7 +82,7 @@ struct client passangerInformation(int clientSocket){
     confirmation = clientInput(clientSocket);
     strcpy(customer.name, confirmation);
     free(confirmation);
-    
+
     sprintf(message, "Enter DOB: \t\t");
     sendMessage(message, clientSocket);
     //scanf(" %[^\n]%*c", customer.DOB);
@@ -131,9 +131,9 @@ void InquiryTicket(int clientSocket){
     FILE *fptr;
 
     char message[256];
-    
 
-    char *ticketNumber[10];
+
+    char ticketNumber[10];
     char *name[500];
     char *DOB[10];
     char *gender[10];
@@ -210,7 +210,7 @@ void InquiryTicket(int clientSocket){
 //Writing
 void MakingReservation(struct client *customer, int clientSocket){
     //Generate random ticket number, right now same ticket number for all of them
-    
+
     char message[256];
 
     char *ticketPtr = randomTicketGeneration();
@@ -299,7 +299,7 @@ void CancelReservation(int clientSocket){
     char line[1000];
     FILE *fptr, *fptr1, *fptr2, *fptr3;
 
-    char *ticketNumber[10];
+    char ticketNumber[10];
     char *name[500];
     char *DOB[10];
     char *gender[10];
@@ -313,7 +313,7 @@ void CancelReservation(int clientSocket){
 
     char message[256];
     char *userInput;
-    
+
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
         printf("Error! Could not open Day1.txt");
@@ -416,7 +416,7 @@ void ModifyReservation(int clientSocket){
     int operation;
 
     FILE *fptr, *fptr2;
-    char *ticketNumber[10];
+    char ticketNumber[10];
     char *name[500];
     char *DOB[10];
     char *gender[10];
@@ -429,7 +429,7 @@ void ModifyReservation(int clientSocket){
 
     char message[256];
     char *userInput;
-    
+
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
         printf("Error! Could not open Day1.txt");
@@ -480,7 +480,7 @@ void ModifyReservation(int clientSocket){
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nCouldn't find ticket number. Please try again! ");
             sendMessage(message, clientSocket);
-            
+
         }
 
     } while(1);
@@ -522,11 +522,11 @@ void ModifyReservation(int clientSocket){
                     memset(&message, '\0', sizeof(message));
                     sprintf(message, "\n\nPlease enter number of seats to add: ");
                     sendMessage(message, clientSocket);
-                    
+
                      memset(userInput, '\0', sizeof(userInput));
                     userInput = clientInput(clientSocket);
                    numOfTravelersModified= atoi(userInput);
-     
+
                     operation = 1;
                     ChangeNumberTravelers(day, input, numOfTravelersModified, operation, clientSocket);
                     break;
@@ -535,7 +535,7 @@ void ModifyReservation(int clientSocket){
                     memset(&message, '\0', sizeof(message));
                     sprintf(message, "\n\nPlease enter number of seats to remove: ");
                     sendMessage(message, clientSocket);
-                    
+
                     memset(userInput, '\0', sizeof(userInput));
                     userInput = clientInput(clientSocket);
                     numOfTravelersModified= atoi(userInput);
@@ -549,12 +549,12 @@ void ModifyReservation(int clientSocket){
 
 //Write
 void ChangeSeats(int day, char input[], int clientSocket){
-    char *ticketNumber[10];
+    char ticketNumber[10];
     int seatsFound = 0;
     int seat;
 
     char message[256];
-    
+
 
     if(day == 1){
         FILE *fptr1;
@@ -637,7 +637,7 @@ void DisplayReservation(int day, char input[], int clientSocket){
     int seat;
     int match = 0;
 
-    char *ticketNumber[10];
+    char ticketNumber[10];
     char *name[50];
     char *DOB[50];
     char *gender[10];
@@ -645,7 +645,7 @@ void DisplayReservation(int day, char input[], int clientSocket){
     int numOfTravelers;
 
     char message[256];
-    
+
 
     if(day == 1){
         if ((fptr = fopen("Day1.txt", "r")) == NULL) {
@@ -703,7 +703,7 @@ void DisplayReservation(int day, char input[], int clientSocket){
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nSeats:\t\t");
             sendMessage(message, clientSocket);
-            
+
 
             while(fscanf(fptr1, "%s\t%d\n", ticketNumber, &seat) != EOF){
                 if(!strcmp(ticketNumber, input)){
@@ -821,7 +821,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
     int availableSeats;
     int seat;
 
-    char *ticketNumber[10];
+    char ticketNumber[10];
     char *name[500];
     char *DOB[10];
     char *gender[10];
@@ -829,7 +829,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
     int numOfTravelers;
 
     char message[256];
-    
+
 
     if(day == 1){
         availableSeats = 20;
@@ -1011,7 +1011,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
 void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int operation, int clientSocket){
     FILE *fptr1, *fptr2, *fptr3;
 
-    char *ticketNumber[10];
+    char ticketNumber[10];
     char *name[500];
     char *DOB[10];
     char *gender[10];
@@ -1023,7 +1023,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
     int seat;
     int valid = 0;
 
-    
+
     char message[256];
 
 
