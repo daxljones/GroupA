@@ -638,8 +638,8 @@ void DisplayReservation(int day, char input[], int clientSocket){
     int match = 0;
 
     char *ticketNumber[10];
-    char *name[500];
-    char *DOB[10];
+    char *name[50];
+    char *DOB[50];
     char *gender[10];
     int idNumber;
     int numOfTravelers;
@@ -680,6 +680,7 @@ void DisplayReservation(int day, char input[], int clientSocket){
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
+            printf("\n\n-------DOB: %s------\n\n", DOB);
             sprintf(message, "\nDOB:\t\t%s", &DOB);
             sendMessage(message, clientSocket);
 

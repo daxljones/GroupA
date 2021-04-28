@@ -281,7 +281,7 @@ char * clientInput(int clientSocket)
 {
     char *clientResponse = malloc(sizeof(char) * 256);
 
-    sleep(2);
+    //sleep(2);
 
     sendMessage("input", clientSocket);
     
