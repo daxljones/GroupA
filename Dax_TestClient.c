@@ -48,7 +48,7 @@ int main()
     {
         while(1)
         {
-            memset(re, '\0', sizeof(re));
+            //memset(re, '\0', sizeof(re));
             //printf("\n[-]Waiting to recive next thing...\n");
             if(recv(clientSocket, re, 256, 0)  == -1) //recieve client response
             {

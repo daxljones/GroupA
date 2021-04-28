@@ -22,6 +22,7 @@ void SeatsAvailable(int seatsPurchased, char ticketNumber[], int dayOfTravel, in
     do {
         //Print Seats
         DisplaySeats(dayOfTravel, clientSocket);
+        printf("\nASKING FOR SEATS--\n");
 
         //Choosing seat
         //printf("\nPick seat for passanger #%d: ", count + 1);
@@ -153,7 +154,7 @@ void DisplaySeats(int dayOfTravel, int clientSocket){
         memset(&message, '\0', sizeof(message));
         sprintf(message, "\n\t");
         sendMessage(message, clientSocket);
-        
+
         while(fscanf(fptr, "%d\n", &currentSeat) != EOF)
         {
             if(rowCounter == rows){
