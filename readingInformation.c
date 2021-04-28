@@ -102,7 +102,7 @@ struct client passangerInformation(int clientSocket){
     sendMessage(message, clientSocket);
     //scanf(" %d", &customer.governmentIDNum);
     confirmation = clientInput(clientSocket);
-    strcpy(customer.governmentIDNum, confirmation);
+    customer.governmentIDNum = atoi(confirmation);
     free(confirmation);
 
     sprintf(message, "Number of Travelers:\t");
