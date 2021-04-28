@@ -10,7 +10,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 2226
+#define PORT 2225
 
 int main()
 {
@@ -48,25 +48,35 @@ int main()
     {
         while(1)
         {
-            memset(re, 0, sizeof(re));
+            memset(re, '\0', sizeof(re));
+            //printf("\n[-]Waiting to recive next thing...\n");
             if(recv(clientSocket, re, 256, 0)  == -1) //recieve client response
             {
                 printf("\n\n[-]Something Failed Recieving!\n\n");
                 exit(0);
             }
 
-            if(strcmp(re, "input")) //Server needs user input
+            fflush(stdout);
+            printf("%s", re);
+
+            if(strcmp(re, "input") == 0) //Server needs user input
             {
                 break;
             }
 
-            printf("%s", re);
+            
         }
 
-        fgets(input, sizeof(input), stdin);
+        scanf(" %s", input);
+
+        printf("\ngoing to send.\n");
+        
+        if(send(clientSocket, input, strlen(input) + 1, 0) == -1)
+        {
+            printf("\n\n[-]Something Failed sending message!\n\n");
+        }
 
         printf("\nSending...\n");
-        send(clientSocket, input, strlen(input) + 1, 0);
 
     }
 

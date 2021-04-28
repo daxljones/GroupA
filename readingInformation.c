@@ -19,59 +19,119 @@ int main(int argc, char *argv[])
 }
 */
 
-//Read
-void MakeReservation(){ 
+//Read 
+struct client passangerInformation(int clientSocket){
     struct client customer;
-    customer = passangerInformation();
-    char confirmation[10];
+    char *confirmation;
+    char message[256];
+
+
+    sprintf(message, "Enter name: \t\t");
+    sendMessage(message, clientSocket);
+    //scanf (" %[^\n]%*c", customer.name);
+    memset(confirmation, '\0', sizeof(confirmation));
+    confirmation = clientInput(clientSocket);
+    sprintf(customer.name, " %[^\n]%*c", confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "Enter DOB: \t\t");
+    sendMessage(message, clientSocket);
+    //scanf(" %[^\n]%*c", customer.DOB);
+    memset(confirmation, '\0', sizeof(confirmation));
+    confirmation = clientInput(clientSocket);
+    sprintf(customer.DOB, " %[^\n]%*c", confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "Enter gender: \t\t");
+    sendMessage(message, clientSocket);
+    //scanf (" %[^\n]%*c", customer.gender);
+    memset(confirmation, '\0', sizeof(confirmation));
+    confirmation = clientInput(clientSocket);
+    sprintf(customer.gender, " %[^\n]%*c", confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "Enter ID number: \t");
+    sendMessage(message, clientSocket);
+    //scanf(" %d", &customer.governmentIDNum);
+    memset(confirmation, '\0', sizeof(confirmation));
+    confirmation = clientInput(clientSocket);
+    customer.governmentIDNum = atoi(confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "Number of Travelers:\t");
+    sendMessage(message, clientSocket);
+    //scanf(" %d", &customer.numOfTravelers);
+    memset(confirmation, '\0', sizeof(confirmation));
+    confirmation = clientInput(clientSocket);
+    customer.numOfTravelers = atoi(confirmation);
+
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "\nDate of travel (1 or 2):");
+    sendMessage(message, clientSocket);
+    //scanf(" %d", &customer.dateOfTravel);
+    memset(confirmation, '\0', sizeof(confirmation));
+    confirmation = clientInput(clientSocket);
+    customer.dateOfTravel = atoi(confirmation);
+
+    free(confirmation);
+    return customer;
+}
+
+//Read
+void MakeReservation(int clientSocket){ 
+    struct client customer;
+    customer = passangerInformation(clientSocket);
+    char *confirmation;
+
+    char message[256];
+    
 
     do{
-        printf("\n\nDo you want to make a reservation?(yes/no): ");
-        scanf(" %s", confirmation);
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\n\nDo you want to make a reservation?(yes/no): ");
+        sendMessage(message, clientSocket);
+        confirmation = clientInput(clientSocket);
         if(!strcmp(confirmation, "yes")){
-            printf("\n\nYour reservation is being processed...\n");
-            MakingReservation(&customer);
-            printf("\n\nYour reservation has been completed!\n");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\n\nYour reservation is being processed...\n");
+            sendMessage(message, clientSocket);
+
+            MakingReservation(&customer, clientSocket);
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\n\nYour reservation has been completed!\n");
+            sendMessage(message, clientSocket);
 
             break;
         }
 
         else if(!strcmp(confirmation, "no")){
-            printf("\n\nYour reservation has been canceled!\n");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\n\nYour reservation has been canceled!\n");
+            sendMessage(message, clientSocket);
+
             break;
         }
 
         else {
-            printf("\nNot a valid confirmation. Please enter yes or no\n");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nNot a valid confirmation. Please enter yes or no\n");
+            sendMessage(message, clientSocket);
         }
 
     } while(1);
+
+    free(confirmation);
 }
 
-//Read 
-struct client passangerInformation(){
-    struct client customer;
-    printf("Enter name: \t\t");
-    scanf (" %[^\n]%*c", customer.name);
-    printf("Enter DOB: \t\t");
-    scanf(" %[^\n]%*c", customer.DOB);
-    printf("Enter gender: \t\t");
-    scanf (" %[^\n]%*c", customer.gender);
-    printf("Enter ID number: \t");
-    scanf(" %d", &customer.governmentIDNum);
-    printf("Number of Travelers:\t");
-    scanf(" %d", &customer.numOfTravelers);
-    printf("\nDate of travel (1 or 2):");
-    scanf(" %d", &customer.dateOfTravel);
-
-    return customer;
-}
 
 //Reads ticket number
-void InquiryTicket(){
+void InquiryTicket(int clientSocket){
     char stateInfo[1000];
     char line[1000];
     FILE *fptr;
+
+    char message[256];
+    
 
     char *ticketNumber[10];
     char *name[500];
@@ -79,22 +139,29 @@ void InquiryTicket(){
     char *gender[10];
     int idNumber;
     int numOfTravelers;
-    char input[10];
+    char *input;
 
     int match;
     int day;
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
-        printf("Error! Could not open Day1.txt");
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "Error! Could not open Day1.txt");
         exit(1);
     }
 
     do {
         match = 0;
         //fgets(stateInfo, 1000, fptr);
-        printf("\n\tINQUIRY TICKET\n");
-        printf("\nTicket Number: ");
-        scanf(" %s", input);
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\n\tINQUIRY TICKET\n");
+        sendMessage(message, clientSocket);
+
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\nTicket Number: ");
+        sendMessage(message, clientSocket);
+
+        input = clientInput(clientSocket);//", input);
 
         while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
             if(!strcmp(ticketNumber, input)){
@@ -124,21 +191,29 @@ void InquiryTicket(){
         }
 
         if(match != 0){
-            DisplayReservation(day, ticketNumber);
+            DisplayReservation(day, ticketNumber, clientSocket);
             break;
         }
 
         else {
-            printf("\nCould not find ticket. Please try again!");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nCould not find ticket. Please try again!");
+            sendMessage(message, clientSocket);
+
             rewind(fptr);
         }
     } while(1);
+
+    free(input);
     fclose(fptr);
 }
 
 //Writing
-void MakingReservation(struct client *customer){
+void MakingReservation(struct client *customer, int clientSocket){
     //Generate random ticket number, right now same ticket number for all of them
+    
+    char message[256];
+
     char *ticketPtr = randomTicketGeneration();
     char ticketNumber[6];
     strcpy(ticketNumber, ticketPtr);
@@ -173,10 +248,12 @@ void MakingReservation(struct client *customer){
 
     //Allow user to pick seats
     SeatsAvailable(customer->numOfTravelers, ticketNumber, customer->dateOfTravel);
-    printf("\nYour ticket number is: %s", ticketNumber);
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "\nYour ticket number is: %s", ticketNumber);
+    sendMessage(message, clientSocket);
 
     //Display final reservation
-    DisplayReservation(dayOfTravel, ticketNumber);
+    DisplayReservation(dayOfTravel, ticketNumber, clientSocket);
 }
 
 
@@ -218,7 +295,7 @@ char* randomTicketGeneration(void)
 }
 
 //Write
-void CancelReservation(){
+void CancelReservation(int clientSocket){
     char stateInfo[1000];
     char line[1000];
     FILE *fptr, *fptr1, *fptr2, *fptr3;
@@ -229,11 +306,15 @@ void CancelReservation(){
     char *gender[10];
     int idNumber;
     int numOfTravelers;
-    char input[10];
+    int input;
 
     int day = 0;
 
     int match;
+
+    char message[256];
+    char *userInput;
+    
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
         printf("Error! Could not open Day1.txt");
@@ -244,8 +325,13 @@ void CancelReservation(){
 
     do {
         match = 0;
-        printf("\nTicket Number: ");
-        scanf(" %s", input);
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\nTicket Number: ");
+        sendMessage(message, clientSocket);
+
+        userInput = clientInput(clientSocket);
+
+        input = atoi(userInput);
 
         if(input == "1"){
             break;
@@ -265,21 +351,21 @@ void CancelReservation(){
 
         if(match == 0){
             fptr3 = fopen("tmp1.txt", "w");
-            //printf("\nDEBUG: Attempting to look in Day2.txt");
+            //sprintf(message, "\nDEBUG: Attempting to look in Day2.txt");
             if ((fptr2 = fopen("Day2.txt", "r")) == NULL) {
                 printf("Error! Could not open Day2.txt trying to cancel reservation");
                 exit(1);
             }
-            //printf("\nDEBUG2: Successfully opened Day2.txt");
+            //sprintf(message, "\nDEBUG2: Successfully opened Day2.txt");
             while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
                 if(!strcmp(ticketNumber, input)){
-                    //printf("\nDEBUG3: Match found in Day 2, no copying line into tmp file");
+                    //sprintf(message, "\nDEBUG3: Match found in Day 2, no copying line into tmp file");
                     match = 1;
                     day = 2;
                 }
 
                 else {
-                    //printf("\nDEBUG4: This line does not equal ticket, copying it into tmp.txt");
+                    //sprintf(message, "\nDEBUG4: This line does not equal ticket, copying it into tmp.txt");
                     fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
                 }
             }
@@ -287,16 +373,18 @@ void CancelReservation(){
 
         if(match == 1){
             //Give seats back
-            //printf("\nInput before sending to remove seats: %s", input);
+            //sprintf(message, "\nInput before sending to remove seats: %s", input);
 
             GiveSeatsBack(day, input);
             RemoveSeats(day, input);
 
-            //printf("\nDEBUG: Match found after copying files, Exiting now");
+            //sprintf(message, "\nDEBUG: Match found after copying files, Exiting now");
             break;
         }
         else {
-            printf("\nCouldn't find ticket number. Please try again! ");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nCouldn't find ticket number. Please try again! ");
+            sendMessage(message, clientSocket);
         }
 
     } while(1);
@@ -314,11 +402,15 @@ void CancelReservation(){
         remove("Day2.txt");
         rename("tmp1.txt", "Day2.txt");
     }
-    printf("\n\nYour reservation has been canceled!");
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "\n\nYour reservation has been canceled!");
+    sendMessage(message, clientSocket);
+
+    free(userInput);
 }
 
 //Write
-void ModifyReservation(){
+void ModifyReservation(int clientSocket){
     int choice;
     int choice2;
     int numOfTravelersModified;
@@ -331,22 +423,31 @@ void ModifyReservation(){
     char *gender[10];
     int idNumber;
     int numOfTravelers;
-    char input[10];
+    char *input;
     int day = 0;
 
     int match;
+
+    char message[256];
+    char *userInput;
+    
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
         printf("Error! Could not open Day1.txt");
         exit(1);
     }
 
-    printf("\n\n\tMODIFY RESERVATION\n");
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "\n\n\tMODIFY RESERVATION\n");
+    sendMessage(message, clientSocket);
 
     do {
         match = 0;
-        printf("\nTicket Number: ");
-        scanf(" %s", input);
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\nTicket Number: ");
+        sendMessage(message, clientSocket);
+
+        input = clientInput(clientSocket);//", input);
 
         //Look for ticket number in Day 1
         while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
@@ -377,64 +478,84 @@ void ModifyReservation(){
         }
 
         else {
-            printf("\nCouldn't find ticket number. Please try again! ");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nCouldn't find ticket number. Please try again! ");
+            sendMessage(message, clientSocket);
+            
         }
 
     } while(1);
 
-    printf("\n1. Change Seat");
-    printf("\n2. Change Travel Day");
-    printf("\n3. Change Number of Travelers\n");
+    memset(&message, '\0', sizeof(message));
+    sprintf(message, "\n1. Change Seat\n2. Change Travel Day\n3. Change Number of Travelers\n\nEnter option number: ");
+    sendMessage(message, clientSocket);
 
-
-    printf("\nEnter option number: ");
     //Add checker for correct input
-    scanf("%d", &choice);
+    userInput = clientInput(clientSocket);
+    choice = atoi(userInput);
+
     //choice = 1;
     switch(choice)
     {
         case 1:
             //Change Seats
-            ChangeSeats(day, input);
+            ChangeSeats(day, input, clientSocket);
             break;
 
         case 2:
             //Change Travel Day
-            ChangeTravelDay(day, input, numOfTravelers);
+            ChangeTravelDay(day, input, numOfTravelers, clientSocket);
             break;
 
         case 3:
             //Change number of travelers
-            printf("\n\n1. Add Travelers");
-            printf("\n2. Remove Travelers");
-            printf("\n\nEnter option number: ");
-            scanf("%d", &choice2);
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\n\n1. Add Travelers\n2. Remove Travelers\n\nEnter option number: ");
+            sendMessage(message, clientSocket);
+
+            memset(userInput, '\0', sizeof(userInput));
+            userInput = clientInput(clientSocket);
+            choice2 = atoi(userInput);
 
             switch(choice2)
             {
                 case 1:
-                    printf("\n\nPlease enter number of seats to add: ");
-                    scanf("%d", &numOfTravelersModified);
+                    memset(&message, '\0', sizeof(message));
+                    sprintf(message, "\n\nPlease enter number of seats to add: ");
+                    sendMessage(message, clientSocket);
+                    
+                     memset(userInput, '\0', sizeof(userInput));
+                    userInput = clientInput(clientSocket);
+                   numOfTravelersModified= atoi(userInput);
+     
                     operation = 1;
-                    ChangeNumberTravelers(day, input, numOfTravelersModified, operation);
+                    ChangeNumberTravelers(day, input, numOfTravelersModified, operation, clientSocket);
                     break;
 
                 case 2:
-                    printf("\n\nPlease enter number of seats to remove: ");
-                    scanf("%d", &numOfTravelersModified);
+                    memset(&message, '\0', sizeof(message));
+                    sprintf(message, "\n\nPlease enter number of seats to remove: ");
+                    sendMessage(message, clientSocket);
+                    
+                    memset(userInput, '\0', sizeof(userInput));
+                    userInput = clientInput(clientSocket);
+                    numOfTravelersModified= atoi(userInput);
                     //Remove seats operation
                     operation = -1;
-                    ChangeNumberTravelers(day, input, numOfTravelersModified, operation);
+                    ChangeNumberTravelers(day, input, numOfTravelersModified, operation, clientSocket);
                     break;
             }
     }
 }
 
 //Write
-void ChangeSeats(int day, char input[]){
+void ChangeSeats(int day, char input[], int clientSocket){
     char *ticketNumber[10];
     int seatsFound = 0;
     int seat;
+
+    char message[256];
+    
 
     if(day == 1){
         FILE *fptr1;
@@ -450,18 +571,24 @@ void ChangeSeats(int day, char input[]){
             }
         }
 
-        printf("\nNumber of seats initially purchased: %d", seatsFound);
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\nNumber of seats initially purchased: %d", seatsFound);
+        sendMessage(message, clientSocket);
+
         //Removing original seats
         GiveSeatsBack(day, input);
         RemoveSeats(day, input);
 
-        printf("\nPlease enter the new seat number for each passanger");
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\nPlease enter the new seat number for each passanger");
+        sendMessage(message, clientSocket);
+
 
         //Allow user to pick new seats
         SeatsAvailable(seatsFound, ticketNumber, day);
 
         //Display final reservation
-        DisplayReservation(day, ticketNumber);
+        DisplayReservation(day, ticketNumber, clientSocket);
     }
 
     else if(day == 2){
@@ -478,26 +605,35 @@ void ChangeSeats(int day, char input[]){
             }
         }
 
-        printf("\nNumber of seats initially purchased: %d", seatsFound);
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\nNumber of seats initially purchased: %d", seatsFound);
+        sendMessage(message, clientSocket);
+
         //Removing original seats
         GiveSeatsBack(day, input);
         RemoveSeats(day, input);
 
-        printf("\nPlease enter the new seat number for each passanger");
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\nPlease enter the new seat number for each passanger");
+        sendMessage(message, clientSocket);
+
 
         //Allow user to pick new seats
         SeatsAvailable(seatsFound, ticketNumber, day);
 
         //Display final reservation
-        DisplayReservation(day, ticketNumber);
+        DisplayReservation(day, ticketNumber, clientSocket);
     }
     else {
-        printf("Error! Not a valid travel day - Change Seats");
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "Error! Not a valid travel day - Change Seats");
+        sendMessage(message, clientSocket);
+
     }
 }
 
 //Write
-void DisplayReservation(int day, char input[]){
+void DisplayReservation(int day, char input[], int clientSocket){
     FILE *fptr, *fptr1;
     int seat;
     int match = 0;
@@ -508,6 +644,9 @@ void DisplayReservation(int day, char input[]){
     char *gender[10];
     int idNumber;
     int numOfTravelers;
+
+    char message[256];
+    
 
     if(day == 1){
         if ((fptr = fopen("Day1.txt", "r")) == NULL) {
@@ -529,25 +668,58 @@ void DisplayReservation(int day, char input[]){
                 exit(1);
             }
 
-            printf("\n\tRESERVATION INFO\n");
-            printf("\nTicket Number: \t%s", &ticketNumber);
-            printf("\nName:\t\t%s", &name);
-            printf("\nDOB:\t\t%s", &DOB);
-            printf("\nGender:\t\t%s", &gender);
-            printf("\nID Number:\t%d", idNumber);
-            printf("\nNum of Travels: %d", numOfTravelers);
-            printf("\nDay:\t\t%d", day);
-            printf("\nSeats:\t\t");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\n\tRESERVATION INFO\n");
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nTicket Number: \t%s", &ticketNumber);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nName:\t\t%s", &name);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nDOB:\t\t%s", &DOB);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nGender:\t\t%s", &gender);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nID Number:\t%d", idNumber);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nNum of Travels: %d", numOfTravelers);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nDay:\t\t%d", day);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nSeats:\t\t");
+            sendMessage(message, clientSocket);
+            
 
             while(fscanf(fptr1, "%s\t%d\n", ticketNumber, &seat) != EOF){
                 if(!strcmp(ticketNumber, input)){
-                    printf("%d ", seat);
+                    memset(&message, '\0', sizeof(message));
+                    sprintf(message, "%d ", seat);
+                    sendMessage(message, clientSocket);
+
                 }
             }
         }
 
         else {
-            printf("Something went wrong with the reservation...");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "Something went wrong with the reservation...");
+            sendMessage(message, clientSocket);
+
         }
 
         fclose(fptr);
@@ -574,25 +746,57 @@ void DisplayReservation(int day, char input[]){
                 exit(1);
             }
 
-            printf("\n\tRESERVATION INFO\n");
-            printf("\nTicket Number: \t%s", &ticketNumber);
-            printf("\nName:\t\t%s", &name);
-            printf("\nDOB:\t\t%s", &DOB);
-            printf("\nGender:\t\t%s", &gender);
-            printf("\nID Number:\t%d", idNumber);
-            printf("\nNum of Travels: %d", numOfTravelers);
-            printf("\nDay:\t\t%d", day);
-            printf("\nSeats:\t\t");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\n\tRESERVATION INFO\n");
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nTicket Number: \t%s", &ticketNumber);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nName:\t\t%s", &name);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nDOB:\t\t%s", &DOB);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nGender:\t\t%s", &gender);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nID Number:\t%d", idNumber);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nNum of Travels: %d", numOfTravelers);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nDay:\t\t%d", day);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nSeats:\t\t");
+            sendMessage(message, clientSocket);
 
             while(fscanf(fptr1, "%s\t%d\n", ticketNumber, &seat) != EOF){
                 if(!strcmp(ticketNumber, input)){
-                    printf("%d ", seat);
+                    memset(&message, '\0', sizeof(message));
+                    sprintf(message, "%d ", seat);
+                    sendMessage(message, clientSocket);
+
                 }
             }
         }
 
         else {
-            printf("\nSomething went wrong with the reservation...");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nSomething went wrong with the reservation...");
+            sendMessage(message, clientSocket);
+
         }
 
         fclose(fptr);
@@ -600,14 +804,17 @@ void DisplayReservation(int day, char input[]){
     }
 
     else {
-        printf("\nNot a valid travel day");
+        memset(&message, '\0', sizeof(message));
+        sprintf(message, "\nNot a valid travel day");
+        sendMessage(message, clientSocket);
+
     }
 }
 
 //Write
-void ChangeTravelDay(int day, char input[], int numTravelers){
-    //printf("\nDebug: Calling from ChangeTravel day");
-    //printf("\nValues received: \nDay: %d TicketNumber: %s Travelers: %d", day, input, numTravelers);
+void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
+    //sprintf(message, "\nDebug: Calling from ChangeTravel day");
+    //sprintf(message, "\nValues received: \nDay: %d TicketNumber: %s Travelers: %d", day, input, numTravelers);
 
     FILE *fptr1, *fptr2, *fptr3, *fptr4, *fptr5;
     int currentSeat;
@@ -620,6 +827,9 @@ void ChangeTravelDay(int day, char input[], int numTravelers){
     char *gender[10];
     int idNumber;
     int numOfTravelers;
+
+    char message[256];
+    
 
     if(day == 1){
         availableSeats = 20;
@@ -639,10 +849,12 @@ void ChangeTravelDay(int day, char input[], int numTravelers){
 
         fclose(fptr2);
 
-        //printf("\nDebug available Seats: %d", availableSeats);
+        //sprintf(message, "\nDebug available Seats: %d", availableSeats);
 
         if(availableSeats < numTravelers){
-            printf("\nSorry! There are not enough seats for the other day. Couldn't change days");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nSorry! There are not enough seats for the other day. Couldn't change days");
+            sendMessage(message, clientSocket);
         }
 
         else {
@@ -702,7 +914,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers){
 
             //ALLOW USER TO PICK NEW SEATS - IN DAY 2
             SeatsAvailable(numOfTravelers, ticketNumber, day);
-            DisplayReservation(day, input);
+            DisplayReservation(day, input, clientSocket);
         }
     }
 
@@ -724,10 +936,13 @@ void ChangeTravelDay(int day, char input[], int numTravelers){
 
         fclose(fptr2);
 
-        //printf("\nDebug available Seats: %d", availableSeats);
+        //sprintf(message, "\nDebug available Seats: %d", availableSeats);
 
         if(availableSeats < numTravelers){
-            printf("\nSorry! There are not enough seats for the other day. Couldn't change days");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nSorry! There are not enough seats for the other day. Couldn't change days");
+            sendMessage(message, clientSocket);
+
         }
 
         else {
@@ -787,13 +1002,13 @@ void ChangeTravelDay(int day, char input[], int numTravelers){
 
             //ALLOW USER TO PICK NEW SEATS - IN DAY 2
             SeatsAvailable(numOfTravelers, ticketNumber, day);
-            DisplayReservation(day, input);
+            DisplayReservation(day, input, clientSocket);
         }
     }
 }
 
 //Write
-void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int operation){
+void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int operation, int clientSocket){
     FILE *fptr1, *fptr2, *fptr3;
 
     char *ticketNumber[10];
@@ -807,6 +1022,9 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
     int availableSeats;
     int seat;
     int valid = 0;
+
+    
+    char message[256];
 
 
     if(day == 1){
@@ -829,7 +1047,10 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
             fclose(fptr1);
 
             if(availableSeats < numOfTravelersModified){
-                printf("There are not enough seats to complete your request. Please try again.");
+                memset(&message, '\0', sizeof(message));
+                sprintf(message, "There are not enough seats to complete your request. Please try again.");
+                sendMessage(message, clientSocket);
+
             }
 
             else {
@@ -859,7 +1080,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 //Allow user to pick new seats
                 SeatsAvailable(numOfTravelersModified, input, day);
-                DisplayReservation(day, input);
+                DisplayReservation(day, input, clientSocket);
             }
         }
 
@@ -880,7 +1101,9 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
                     }
                     else {
                         fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
-                        printf("\nCouldn't modify reservation. Can't remove more seats than the ones that were originally purchased.");
+                        memset(&message, '\0', sizeof(message));
+                        sprintf(message, "\nCouldn't modify reservation. Can't remove more seats than the ones that were originally purchased.");
+                        sendMessage(message, clientSocket);
                     }
                 }
 
@@ -900,12 +1123,15 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 //ALLOW USER TO PICK NEW SEATS
                 SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day);
-                DisplayReservation(day, input);
+                DisplayReservation(day, input, clientSocket);
             }
         }
 
         else {
-            printf("\nNot valid operation");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nNot valid operation");
+            sendMessage(message, clientSocket);
+
         }
     }
 
@@ -929,7 +1155,10 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
             fclose(fptr1);
 
             if(availableSeats < numOfTravelersModified){
-                printf("There are not enough seats to complete your request. Please try again.");
+                memset(&message, '\0', sizeof(message));
+                sprintf(message, "There are not enough seats to complete your request. Please try again.");
+                sendMessage(message, clientSocket);
+
             }
 
             else {
@@ -959,7 +1188,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 //Allow user to pick new seats
                 SeatsAvailable(numOfTravelersModified, input, day);
-                DisplayReservation(day, input);
+                DisplayReservation(day, input, clientSocket);
             }
         }
 
@@ -980,7 +1209,10 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
                     }
                     else {
                         fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
-                        printf("\nCouldn't modify reservation. Can't remove more seats than the ones that were originally purchased.");
+                        memset(&message, '\0', sizeof(message));
+                        sprintf(message, "\nCouldn't modify reservation. Can't remove more seats than the ones that were originally purchased.");
+                        sendMessage(message, clientSocket);
+
                     }
                 }
 
@@ -1000,17 +1232,21 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 //ALLOW USER TO PICK NEW SEATS
                 SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day);
-                DisplayReservation(day, input);
+                DisplayReservation(day, input, clientSocket);
             }
         }
 
         else {
-            printf("\nNot valid operation");
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nNot valid operation");
+            sendMessage(message, clientSocket);
+
         }
 
     }
     else {
         printf("\nDebug: Not a valid day to travel - Change number of travelers");
+
     }
 }
 

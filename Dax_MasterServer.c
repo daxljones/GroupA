@@ -214,68 +214,41 @@ int connectionWithClient(int *s)
     int clientSocket = *s;
 
     char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program\n\nOption: "; //Menu Needs to be declared some where to send 
-    char userChoice[256];
+    char *userChoice;
     int choice;
     char message[256];
     int num = 0;
 
     while(1)
-    {
-        //===================================================
-        //This is the loop the menu sending/recieving will go
-        //I've written a rough outline for how it should work
-        //===================================================
-
-
-        printf("Sending message...\n");
-        
+    {   
         // Send menu
-        if(send(clientSocket, menu, strlen(menu), 0) == -1)
-        {
-            printf("\n\n[-]Something Failed sending message!\n\n");
-        }
+        sendMessage(menu, clientSocket);
 
-        send(clientSocket, "input", strlen("input"), 0);        
-
-        printf("Waiting to recieve...\n");
-        if(recv(clientSocket, userChoice, 256, 0)  == -1) //recieve client response
-        {
-            printf("\n\n[-]Something Failed Recieving!\n\n");
-            return -1;
-        }
+        userChoice = clientInput(clientSocket);
         
-
         choice = atoi(userChoice); //conversion of choice from string to int
 
-        if(choice == 3)
-        {
-            break;
-        }
+        printf("\n\nuserchoice: %d\n\n", choice);
 
-        printf("Checking choice...\n");
-
-
-
-        //=====================================================================================================
-        //Instead of sending messages back- each case need to call a function to handle the selected menu task
-        //=====================================================================================================
+       
         memset(message, 0, sizeof(message));
         switch (choice)
         {
              case 1:
-                MakeReservation();
+                printf("Client picked Option 1!\n");
+                MakeReservation(clientSocket);
                 break;
 
             case 2:
-                InquiryTicket();
+                InquiryTicket(clientSocket);
                 break;
 
             case 3:
-                ModifyReservation();
+                ModifyReservation(clientSocket);
                 break;
 
             case 4:
-                CancelReservation();
+                CancelReservation(clientSocket);
                 break;
             case 5:
                 return 0;
@@ -291,4 +264,33 @@ int connectionWithClient(int *s)
     close(clientSocket);
 
     return 1;
+}
+
+void sendMessage(char *message, int clientSocket)
+{
+    if(send(clientSocket, message, strlen(message), 0) == -1)
+    {
+        printf("\n\n[-]Something Failed sending message!\n\n");
+    }
+    printf("Sent: %s\n\n", message);
+}
+
+char * clientInput(int clientSocket)
+{
+    char *clientResponse = malloc(sizeof(char) * 256);
+
+    wait(3);
+
+    if(send(clientSocket, "input", strlen("input"), 0) == -1)
+    {
+        printf("\n\n[-]Something Failed sending message!\n\n");
+    }  
+    if(recv(clientSocket, clientResponse, 256, 0)  == -1) //recieve client response
+    {
+        printf("\n\n[-]Something Failed Recieving!\n\n");
+        return -1;
+    }
+
+
+    return clientResponse;
 }

@@ -18,32 +18,6 @@
 #define WRITE "/write"
 #define READ "/read"
 
-int readFile();
-void writeToFile();
-void InquiryTicket();
-void MakingReservation();
-struct client passangerInformation();
-void MakeReservation();
-char* randomTicketGeneration(void);
-void CancelReservation();
-void GiveSeatsBack(int, char *);
-void RemoveSeats(int, char *);
-void TrackSeatChosen(char *, int, int);
-void SeatsAvailable(int, char *, int);
-void ChooseSeat(int, int);
-void DisplaySeats(int);
-void DisplayReservation(int, char *);
-void ChangeNumberTravelers(int,char *, int, int);
-void ChangeTravelDay(int, char *, int);
-void ChangeTravelDay(int, char *, int);
-void ChangeSeats(int, char *);
-
-sem_t *write_sem;
-sem_t *read_sem;
-
-static int readerCount;
-
-
 struct client{
     char name[50];
     char DOB[50];
@@ -52,6 +26,34 @@ struct client{
     int governmentIDNum;
     int numOfTravelers;
 };
+
+
+int readFile();
+void writeToFile();
+void sendMessage(char *, int);
+char * clientInput(int);
+void InquiryTicket(int);
+void MakingReservation(struct client *, int);
+void ModifyReservation(int);
+void MakeReservation(int);
+char* randomTicketGeneration(void);
+void CancelReservation(int);
+void GiveSeatsBack(int, char *);
+void RemoveSeats(int, char *);
+void TrackSeatChosen(char *, int, int);
+void SeatsAvailable(int, char *, int);
+void ChooseSeat(int, int);
+void DisplaySeats(int);
+void DisplayReservation(int, char *, int);
+void ChangeNumberTravelers(int,char *, int, int, int);
+void ChangeTravelDay(int, char *, int, int);
+void ChangeSeats(int, char *, int);
+
+sem_t *write_sem;
+sem_t *read_sem;
+
+static int readerCount;
+
 
 #include "Dax_Queue.c"
 #include "Dax_ReadWriteSync.c"
