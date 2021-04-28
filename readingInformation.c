@@ -78,7 +78,6 @@ struct client passangerInformation(int clientSocket){
     sprintf(message, "Enter name: \t\t");
     sendMessage(message, clientSocket);
     //scanf (" %[^\n]%*c", customer.name);
-    printf("back from freeing\n\n");
     confirmation = clientInput(clientSocket);
     strcpy(customer.name, confirmation);
     free(confirmation);
