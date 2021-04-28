@@ -11,8 +11,8 @@ int connectionWithClient(int *);
 void * threadFunc(void *);
 
 #define BASEPORT 2224
-#define NUM_OF_SERVERS 5
-#define THREAD_NUM 5
+#define NUM_OF_SERVERS 1
+#define THREAD_NUM 1
 
 
 pthread_mutex_t lock[NUM_OF_SERVERS];
@@ -296,15 +296,20 @@ char * clientInput(int clientSocket)
         return -1;
     }
 
-
-    printf("recieved: %s\n\n", clientResponse);
-
     char c;
 
     for(int i = 0; i < 256; ++i)
     {
         c = clientResponse[i];
-        printf("Char: %c\n", c);
+        if(c == '\n')
+        {
+            clientResponse[i] = '\0';
+            break;
+        }
+        else if(c == '\0')
+        {
+            break;
+        }
     }
 
     return clientResponse;

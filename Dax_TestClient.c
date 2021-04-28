@@ -10,7 +10,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 2225
+#define PORT 2224
 
 int main()
 {
@@ -67,7 +67,7 @@ int main()
             
         }
 
-        scanf(" %s", input);
+        fgets(input, sizeof(input), stdin);
 
         printf("\ngoing to send.\n");
         
