@@ -42,7 +42,7 @@ int main()
     printf("CONNECTED TO SERVER\n\n");
 
     char input[256];
-    char re[512];
+    char re[256];
 
     while(1)
     {
@@ -50,7 +50,7 @@ int main()
         {
             //memset(re, '\0', sizeof(re));
             //printf("\n[-]Waiting to recive next thing...\n");
-            if(recv(clientSocket, re, sizeof re, 0)  == -1) //recieve client response
+            if(recv(clientSocket, re, sizeof(re), 0)  == -1) //recieve client response
             {
                 printf("\n\n[-]Something Failed Recieving!\n\n");
                 exit(0);

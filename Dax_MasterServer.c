@@ -270,7 +270,7 @@ int connectionWithClient(int *s)
 
 void sendMessage(char *message, int clientSocket)
 {
-    if(send(clientSocket, message, strlen(message) + 1, 0) == -1)
+    if(send(clientSocket, message, 256, 0) == -1)
     {
         printf("\n\n[-]Something Failed sending message!\n\n");
     }
@@ -283,11 +283,7 @@ char * clientInput(int clientSocket)
 
     sleep(2);
 
-    if(send(clientSocket, "input", strlen("input") + 1, 0) == -1)
-    {
-        printf("\n\n[-]Something Failed sending message!\n\n");
-    }  
-
+    sendMessage("input", clientSocket);
     
 
     if(recv(clientSocket, clientResponse, 256, 0)  == -1) //recieve client response
@@ -312,7 +308,7 @@ char * clientInput(int clientSocket)
         }
     }
 
-    printf("Recv: %s|\n\n", clientResponse);
+    printf("Recv: %s\n\n", clientResponse);
 
     return clientResponse;
 }
