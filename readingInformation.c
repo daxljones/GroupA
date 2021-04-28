@@ -87,7 +87,7 @@ struct client passangerInformation(int clientSocket){
     sendMessage(message, clientSocket);
     //scanf(" %[^\n]%*c", customer.DOB);
     confirmation = clientInput(clientSocket);
-    strcpy(customer.name, confirmation);
+    strcpy(customer.DOB, confirmation);
     free(confirmation);
 
 
@@ -95,7 +95,7 @@ struct client passangerInformation(int clientSocket){
     sendMessage(message, clientSocket);
     //scanf (" %[^\n]%*c", customer.gender);
     confirmation = clientInput(clientSocket);
-    strcpy(customer.name, confirmation);
+    strcpy(customer.gender, confirmation);
     free(confirmation);
 
 
@@ -103,7 +103,7 @@ struct client passangerInformation(int clientSocket){
     sendMessage(message, clientSocket);
     //scanf(" %d", &customer.governmentIDNum);
     confirmation = clientInput(clientSocket);
-    strcpy(customer.name, confirmation);
+    strcpy(customer.governmentIDNum, confirmation);
     free(confirmation);
 
     sprintf(message, "Number of Travelers:\t");
