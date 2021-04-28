@@ -234,7 +234,8 @@ int connectionWithClient(int *s)
         {
             printf("\n\n[-]Something Failed sending message!\n\n");
         }
-                    
+
+        send(clientSocket, "input", strlen("input"), 0);        
 
         printf("Waiting to recieve...\n");
         if(recv(clientSocket, userChoice, 256, 0)  == -1) //recieve client response
@@ -281,20 +282,6 @@ int connectionWithClient(int *s)
             default:
                 //put error message here;
                 break;
-        }
-
-
-        if(send(clientSocket, message, strlen(message), 0)  == -1) // take out these send recieve
-        {
-            perror("Not working.");
-            return -1;
-        }
-        printf("Sent my message!\n");
-        
-        if(recv(clientSocket, userChoice, 256, 0)  == -1) //recieve client response
-        {
-            printf("\n\n[-]Something Failed Recieving!\n\n");
-            return -1;
         }
 
     }

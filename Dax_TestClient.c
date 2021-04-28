@@ -46,13 +46,22 @@ int main()
 
     while(1)
     {
-        memset(re, 0, sizeof(re));
-        if(recv(clientSocket, re, 256, 0)  == -1) //recieve client response
+        while(1)
         {
-            printf("\n\n[-]Something Failed Recieving!\n\n");
-            exit(0);
+            memset(re, 0, sizeof(re));
+            if(recv(clientSocket, re, 256, 0)  == -1) //recieve client response
+            {
+                printf("\n\n[-]Something Failed Recieving!\n\n");
+                exit(0);
+            }
+
+            if(strcmp(re, "input")) //Server needs user input
+            {
+                break;
+            }
+
+            printf("%s", re);
         }
-        printf("%s", re);
 
         fgets(input, sizeof(input), stdin);
 
