@@ -200,7 +200,7 @@ void * threadFunc(void *package)
         if(*socket != -1)
         {
             connectionWithClient(socket);
-            printf("---It fucked up---\n\n");
+            printf("---It screwed up---\n\n");
         }
         free(socket);
         
@@ -311,6 +311,8 @@ char * clientInput(int clientSocket)
             break;
         }
     }
+
+    printf("Recv: %s|\n\n", clientResponse);
 
     return clientResponse;
 }

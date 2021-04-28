@@ -34,6 +34,7 @@ void MakeReservation(int clientSocket){
         sprintf(message, "\n\nDo you want to make a reservation?(yes/no): ");
         sendMessage(message, clientSocket);
         confirmation = clientInput(clientSocket);
+
         if(!strcmp(confirmation, "yes")){
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\n\nYour reservation is being processed...\n");
@@ -59,6 +60,7 @@ void MakeReservation(int clientSocket){
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nNot a valid confirmation. Please enter yes or no\n");
             sendMessage(message, clientSocket);
+            free(confirmation); 
         }
 
     } while(1);
@@ -76,50 +78,48 @@ struct client passangerInformation(int clientSocket){
     sprintf(message, "Enter name: \t\t");
     sendMessage(message, clientSocket);
     //scanf (" %[^\n]%*c", customer.name);
-    free(confirmation);
     printf("back from freeing\n\n");
     confirmation = clientInput(clientSocket);
     strcpy(customer.name, confirmation);
+    free(confirmation);
     
     sprintf(message, "Enter DOB: \t\t");
     sendMessage(message, clientSocket);
     //scanf(" %[^\n]%*c", customer.DOB);
-    free(confirmation);
     confirmation = clientInput(clientSocket);
     strcpy(customer.name, confirmation);
+    free(confirmation);
 
 
     sprintf(message, "Enter gender: \t\t");
     sendMessage(message, clientSocket);
     //scanf (" %[^\n]%*c", customer.gender);
-    free(confirmation);
     confirmation = clientInput(clientSocket);
     strcpy(customer.name, confirmation);
+    free(confirmation);
 
 
     sprintf(message, "Enter ID number: \t");
     sendMessage(message, clientSocket);
     //scanf(" %d", &customer.governmentIDNum);
-    free(confirmation);
     confirmation = clientInput(clientSocket);
     strcpy(customer.name, confirmation);
+    free(confirmation);
 
     sprintf(message, "Number of Travelers:\t");
     sendMessage(message, clientSocket);
     //scanf(" %d", &customer.numOfTravelers);
-    free(confirmation);
     confirmation = clientInput(clientSocket);
     customer.numOfTravelers = atoi(confirmation);
+    free(confirmation);
 
-    memset(&message, '\0', sizeof(message));
     sprintf(message, "\nDate of travel (1 or 2):");
     sendMessage(message, clientSocket);
     //scanf(" %d", &customer.dateOfTravel);
-    free(confirmation);
     confirmation = clientInput(clientSocket);
     customer.dateOfTravel = atoi(confirmation);
-
     free(confirmation);
+
     return customer;
 }
 
@@ -160,7 +160,7 @@ void InquiryTicket(int clientSocket){
         sprintf(message, "\nTicket Number: ");
         sendMessage(message, clientSocket);
 
-        input = clientInput(clientSocket);//", input);
+        input = clientInput(clientSocket);
 
         while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
             if(!strcmp(ticketNumber, input)){
@@ -246,7 +246,7 @@ void MakingReservation(struct client *customer, int clientSocket){
     }
 
     //Allow user to pick seats
-    SeatsAvailable(customer->numOfTravelers, ticketNumber, customer->dateOfTravel);
+    SeatsAvailable(customer->numOfTravelers, ticketNumber, customer->dateOfTravel, clientSocket);
     memset(&message, '\0', sizeof(message));
     sprintf(message, "\nYour ticket number is: %s", ticketNumber);
     sendMessage(message, clientSocket);
@@ -584,7 +584,7 @@ void ChangeSeats(int day, char input[], int clientSocket){
 
 
         //Allow user to pick new seats
-        SeatsAvailable(seatsFound, ticketNumber, day);
+        SeatsAvailable(seatsFound, ticketNumber, day, clientSocket);
 
         //Display final reservation
         DisplayReservation(day, ticketNumber, clientSocket);
@@ -618,7 +618,7 @@ void ChangeSeats(int day, char input[], int clientSocket){
 
 
         //Allow user to pick new seats
-        SeatsAvailable(seatsFound, ticketNumber, day);
+        SeatsAvailable(seatsFound, ticketNumber, day, clientSocket);
 
         //Display final reservation
         DisplayReservation(day, ticketNumber, clientSocket);
@@ -912,7 +912,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
             day = 2;
 
             //ALLOW USER TO PICK NEW SEATS - IN DAY 2
-            SeatsAvailable(numOfTravelers, ticketNumber, day);
+            SeatsAvailable(numOfTravelers, ticketNumber, day, clientSocket);
             DisplayReservation(day, input, clientSocket);
         }
     }
@@ -1000,7 +1000,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
             day = 1;
 
             //ALLOW USER TO PICK NEW SEATS - IN DAY 2
-            SeatsAvailable(numOfTravelers, ticketNumber, day);
+            SeatsAvailable(numOfTravelers, ticketNumber, day, clientSocket);
             DisplayReservation(day, input, clientSocket);
         }
     }
@@ -1078,7 +1078,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
                 rename("tmp8.txt", "Day1.txt");
 
                 //Allow user to pick new seats
-                SeatsAvailable(numOfTravelersModified, input, day);
+                SeatsAvailable(numOfTravelersModified, input, day, clientSocket);
                 DisplayReservation(day, input, clientSocket);
             }
         }
@@ -1121,7 +1121,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
                 RemoveSeats(day, input);
 
                 //ALLOW USER TO PICK NEW SEATS
-                SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day);
+                SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day, clientSocket);
                 DisplayReservation(day, input, clientSocket);
             }
         }
@@ -1186,7 +1186,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
                 rename("tmp8.txt", "Day2.txt");
 
                 //Allow user to pick new seats
-                SeatsAvailable(numOfTravelersModified, input, day);
+                SeatsAvailable(numOfTravelersModified, input, day, clientSocket);
                 DisplayReservation(day, input, clientSocket);
             }
         }
@@ -1230,7 +1230,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
                 RemoveSeats(day, input);
 
                 //ALLOW USER TO PICK NEW SEATS
-                SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day);
+                SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day, clientSocket);
                 DisplayReservation(day, input, clientSocket);
             }
         }
