@@ -229,6 +229,9 @@ void MakingReservation(struct client *customer, int clientSocket){
 
     //char ticketNumber[] = "OSU1234";
 
+    //---------------------PUT WRITING SEMPHORE HERE-----------------------
+    takeOut(pthread_self());
+
     int dayOfTravel = customer->dateOfTravel;
     if(dayOfTravel == 1){
         FILE *f = fopen("Day1.txt", "a");
