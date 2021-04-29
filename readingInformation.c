@@ -646,8 +646,7 @@ void DisplayReservation(int day, char input[], int clientSocket){
     int numOfTravelers;
 
     char message[256];
-
-    printf("\n\n--Input: %s--\n", input);
+    char fileContents[5000];
 
 
     if(day == 1){
@@ -672,39 +671,48 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\n\tRESERVATION INFO\n");
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nTicket Number: \t%s", &ticketNumber);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nName:\t\t%s", &name);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             printf("\n\n-------DOB: %s------\n\n", DOB);
             sprintf(message, "\nDOB:\t\t%s", &DOB);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nGender:\t\t%s", &gender);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nID Number:\t%d", idNumber);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nNum of Travels: %d", numOfTravelers);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nDay:\t\t%d", day);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nSeats:\t\t");
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
 
@@ -712,10 +720,13 @@ void DisplayReservation(int day, char input[], int clientSocket){
                 if(!strcmp(ticketNumber, input)){
                     memset(&message, '\0', sizeof(message));
                     sprintf(message, "%d ", seat);
+                    strcat(fileContents, message);
                     sendMessage(message, clientSocket);
 
                 }
             }
+
+            sendFile(fileContents, ticketNumber, clientSocket);
         }
 
         else {
