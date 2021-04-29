@@ -6,7 +6,7 @@
 //#include <wait.h>
 
 void server(int);
-int connectionWithClient(int *);
+int connectionWithClient(int *, pthread_t);
 void * threadFunc(void *);
 
 #define BASEPORT 2224
@@ -202,8 +202,6 @@ void * threadFunc(void *package)
     int *socket;
     int s;
     socket = &s;
-
-
     
     while(1)
     {
@@ -214,7 +212,8 @@ void * threadFunc(void *package)
         //printf("%d\n", *socket);
         if(*socket != -1)
         {
-            connectionWithClient(socket);
+            pthread_t me = pthread_self();
+            connectionWithClient(socket, me);
         }
         free(socket);
         
@@ -224,7 +223,7 @@ void * threadFunc(void *package)
 }
 
 
-int connectionWithClient(int *s)
+int connectionWithClient(int *s, pthread_t me)
 {
     int clientSocket = *s;
 
@@ -254,7 +253,7 @@ int connectionWithClient(int *s)
         switch (choice)
         {
              case 1:
-                MakeReservation(clientSocket);
+                MakeReservation(clientSocket, me);
                 break;
 
             case 2:
@@ -362,17 +361,19 @@ void enterQueue(int numOfTickets, pthread_t thread)
 {
     int *priority;
     struct sched_param *param;
-
-    pthread_mutex_lock(&pq);
     
+    pthread_mutex_lock(&pq);
     for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
     {
         if(priorityList[i].tid == thread || priorityList[i].priority == 0)
         {
+            printf("---------HERE  1 %d---------\n", thread);
             priorityList[i].tid = thread;
             priorityList[i].priority = numOfTickets;
 
             pthread_getschedparam(thread, priority, param);
+            printf("---------HERE 2 %d---------\n", thread);
+
             priorityList[i].priority = priorityList[i].priority + (*priority);
             pthread_setschedparam(thread, priorityList[i].priority, param);
         }

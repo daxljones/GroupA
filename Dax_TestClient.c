@@ -45,25 +45,22 @@ int main()
 
     char input[256];
     char re[256];
+    int recieved = 0;
 
     while(1)
     {
         while(1)
         {
-            if(recv(clientSocket, re, sizeof(re), 0)  == -1) //recieve client response
+            if((recieved = recv(clientSocket, re, sizeof(re), 0))  > 0) //recieve client response
             {
-                printf("\n\n[-]Something Failed Recieving!\n\n");
-                exit(0);
+                if(strcmp(re, "input") == 0 || strcmp(re, "exit") == 0 || strcmp(re, "file") == 0) //Server needs user input
+                {
+                    break;
+                }
+
+                fflush(stdout);
+                printf("%s", re);
             }
-
-
-            if(strcmp(re, "input") == 0 || strcmp(re, "exit") == 0 || strcmp(re, "file") == 0) //Server needs user input
-            {
-                break;
-            }
-
-            fflush(stdout);
-            printf("%s", re);
         }
 
         if(strcmp(re, "exit") == 0)

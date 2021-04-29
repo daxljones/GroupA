@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
 
 //Read
-void MakeReservation(int clientSocket){
+void MakeReservation(int clientSocket, pthread_t me){
     struct client customer;
     customer = passangerInformation(clientSocket);
     char *confirmation;
@@ -41,9 +41,9 @@ void MakeReservation(int clientSocket){
             sendMessage(message, clientSocket);
 
             
-            enterQueue(customer.numOfTravelers, pthread_self());
+            enterQueue(customer.numOfTravelers, me);
 
-            MakingReservation(&customer, clientSocket);
+            MakingReservation(&customer, clientSocket, me);
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\n\nYour reservation has been completed!\n");
             sendMessage(message, clientSocket);
@@ -218,7 +218,7 @@ void InquiryTicket(int clientSocket){
 }
 
 //Writing
-void MakingReservation(struct client *customer, int clientSocket){
+void MakingReservation(struct client *customer, int clientSocket, pthread_t me){
     //Generate random ticket number, right now same ticket number for all of them
 
     char message[256];
@@ -231,7 +231,7 @@ void MakingReservation(struct client *customer, int clientSocket){
     //char ticketNumber[] = "OSU1234";
 
     //---------------------PUT WRITING SEMPHORE HERE-----------------------
-    takeOut(pthread_self());
+    takeOut(me);
 
     int dayOfTravel = customer->dateOfTravel;
     if(dayOfTravel == 1){
