@@ -119,6 +119,10 @@ struct client passangerInformation(int clientSocket){
     customer.dateOfTravel = atoi(confirmation);
     free(confirmation);
 
+    //Adding server number and modifications
+    customer.serverNumber = 0;
+    strcpy(customer.modifications, "None");
+
     return customer;
 }
 
@@ -139,6 +143,10 @@ void InquiryTicket(int clientSocket){
     int idNumber;
     int numOfTravelers;
     char *input;
+
+    //Adding server number and modifications
+    char *modifications[100];
+    int serverNumber;
 
     int match;
     int day;
@@ -161,7 +169,7 @@ void InquiryTicket(int clientSocket){
 
         input = clientInput(clientSocket);
 
-        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
             if(!strcmp(ticketNumber, input)){
                 //Add char function: Look for tickets chosen in Seats1_History
                 day = 1;
@@ -178,7 +186,7 @@ void InquiryTicket(int clientSocket){
 
             //fgets(stateInfo, 1000, fptr);
 
-            while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 if(!strcmp(ticketNumber, input)){
                     //Add char function: Look for tickets chosen in Seats1_History
                     day = 2;
@@ -228,7 +236,8 @@ void MakingReservation(struct client *customer, int clientSocket){
             exit(1);
         }
 
-        fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers);
+        fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers, customer->serverNumber, customer->modifications);
+        //fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers);
         fclose(f);
     }
 
@@ -239,8 +248,8 @@ void MakingReservation(struct client *customer, int clientSocket){
             printf("Error opening Day2.txt file!\n");
             exit(1);
         }
-
-        fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers);
+        fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers, customer->serverNumber, customer->modifications);
+        //fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers);
         fclose(f);
     }
 
@@ -312,6 +321,10 @@ void CancelReservation(int clientSocket){
     char message[256];
     char *input;
 
+    //Adding server number and modifications
+    char *modifications[100];
+    int serverNumber;
+
     //WRITING SEMAPHORE
     sem_wait(write_sem);
 
@@ -336,14 +349,14 @@ void CancelReservation(int clientSocket){
         }
 
         //Look for ticket number in Day 1
-        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
             if(!strcmp(ticketNumber, input)){
                 match = 1;
                 day = 1;
             }
 
             else {
-                fprintf(fptr1, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                fprintf(fptr1, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
             }
         }
 
@@ -355,7 +368,7 @@ void CancelReservation(int clientSocket){
                 exit(1);
             }
             //sprintf(message, "\nDEBUG2: Successfully opened Day2.txt");
-            while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 if(!strcmp(ticketNumber, input)){
                     //sprintf(message, "\nDEBUG3: Match found in Day 2, no copying line into tmp file");
                     match = 1;
@@ -364,7 +377,7 @@ void CancelReservation(int clientSocket){
 
                 else {
                     //sprintf(message, "\nDEBUG4: This line does not equal ticket, copying it into tmp.txt");
-                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                 }
             }
         }
@@ -431,6 +444,9 @@ void ModifyReservation(int clientSocket){
     char message[256];
     char *userInput;
 
+    int serverNumber;
+    char *modifications[100];
+
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
         printf("Error! Could not open Day1.txt");
@@ -450,7 +466,7 @@ void ModifyReservation(int clientSocket){
         input = clientInput(clientSocket);
 
         //Look for ticket number in Day 1
-        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
             if(!strcmp(ticketNumber, input)){
                 match = 1;
                 day = 1;
@@ -464,7 +480,7 @@ void ModifyReservation(int clientSocket){
                 exit(1);
             }
 
-            while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 if(!strcmp(ticketNumber, input)){
                     match = 1;
                     day = 2;
@@ -645,9 +661,12 @@ void DisplayReservation(int day, char input[], int clientSocket){
     int idNumber;
     int numOfTravelers;
 
-    char message[256];
+    //Added server number and modifications
+    char* modifications[100];
+    int serverNumber;
 
-    printf("\n\n--Input: %s--\n", input);
+    char message[256];
+    char fileContents[5000];
 
 
     if(day == 1){
@@ -657,7 +676,7 @@ void DisplayReservation(int day, char input[], int clientSocket){
         }
 
         //Store all the information of the current customer
-        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
             if(!strcmp(ticketNumber, input)){
                 match = 1;
                 break;
@@ -672,39 +691,48 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\n\tRESERVATION INFO\n");
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nTicket Number: \t%s", &ticketNumber);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nName:\t\t%s", &name);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             printf("\n\n-------DOB: %s------\n\n", DOB);
             sprintf(message, "\nDOB:\t\t%s", &DOB);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nGender:\t\t%s", &gender);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nID Number:\t%d", idNumber);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nNum of Travels: %d", numOfTravelers);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nDay:\t\t%d", day);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nSeats:\t\t");
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
 
@@ -712,10 +740,23 @@ void DisplayReservation(int day, char input[], int clientSocket){
                 if(!strcmp(ticketNumber, input)){
                     memset(&message, '\0', sizeof(message));
                     sprintf(message, "%d ", seat);
+                    strcat(fileContents, message);
                     sendMessage(message, clientSocket);
 
                 }
             }
+
+<<<<<<< HEAD
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nServer:\t\t%d", serverNumber);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nModifications:\t%s", modifications);
+            sendMessage(message, clientSocket);
+=======
+            sendFile(fileContents, ticketNumber, clientSocket);
+>>>>>>> b9702b3df7d7c56053a6f16ee28bd607202db63e
         }
 
         else {
@@ -736,7 +777,7 @@ void DisplayReservation(int day, char input[], int clientSocket){
         }
 
         //Store all the information of the current customer
-        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+        while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications)){
             if(!strcmp(ticketNumber, input)){
                 match = 1;
                 break;
@@ -793,6 +834,15 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
                 }
             }
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nServer:\t\t%d", serverNumber);
+            sendMessage(message, clientSocket);
+
+            memset(&message, '\0', sizeof(message));
+            sprintf(message, "\nModifications:\t%s", modifications);
+            sendMessage(message, clientSocket);
+
         }
 
         else {
@@ -831,6 +881,10 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
     int idNumber;
     int numOfTravelers;
 
+    //Added serverNumber and modifcations
+    int serverNumber;
+    char *modifications[100];
+
     char message[256];
 
 
@@ -867,8 +921,9 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
                 exit(1);
             }
 
+            //while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
             //Look for original reservation
-            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 //When ticket is found
                 if(!strcmp(ticketNumber, input)){
                     //Open other day file
@@ -878,7 +933,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
                         exit(1);
                     }
                     //Print reservation into other file
-                    fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                     fclose(f);
                     break;
                 }
@@ -892,14 +947,14 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
             fptr3 = fopen("tmp6.txt", "w");
 
             //Scan for ticket number
-            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 //When ticket is found
                 if(!strcmp(ticketNumber, input)){
                     //Do nothing
                 }
                 //Print the current information into tmp file
                 else {
-                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                 }
             }
 
@@ -956,7 +1011,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
             }
 
             //Look for original reservation
-            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 //When ticket is found
                 if(!strcmp(ticketNumber, input)){
                     //Open other day file
@@ -966,7 +1021,7 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
                         exit(1);
                     }
                     //Print reservation into other file
-                    fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                     fclose(f);
                     break;
                 }
@@ -980,14 +1035,14 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
             fptr3 = fopen("tmp7.txt", "w");
 
             //Scan for ticket number
-            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 //When ticket is found
                 if(!strcmp(ticketNumber, input)){
                     //Do nothing
                 }
                 //Print the current information into tmp file
                 else {
-                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                 }
             }
 
@@ -1029,6 +1084,10 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
     char message[256];
 
+    //Added server number and modifications
+    int serverNumber;
+    char *modifications[100];
+
 
     if(day == 1){
         //If trying to add, make sure there are enough seats available
@@ -1065,14 +1124,14 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 fptr3 = fopen("tmp8.txt", "w");
 
-                while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                     if(!strcmp(ticketNumber, input)){
                         //Change number of travelers
-                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers + numOfTravelersModified);
+                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers + numOfTravelersModified, serverNumber, modifications);
                     }
 
                     else {
-                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                     }
                 }
 
@@ -1096,14 +1155,14 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
             fptr2 = fopen("tmp9.txt", "w");
 
-            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 if(!strcmp(ticketNumber, input)){
                     if((numOfTravelers - numOfTravelersModified) > 0){
-                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers - numOfTravelersModified);
+                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers - numOfTravelersModified, serverNumber, modifications);
                         valid = 1;
                     }
                     else {
-                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                         memset(&message, '\0', sizeof(message));
                         sprintf(message, "\nCouldn't modify reservation. Can't remove more seats than the ones that were originally purchased.");
                         sendMessage(message, clientSocket);
@@ -1111,7 +1170,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
                 }
 
                 else {
-                    fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                 }
             }
             fclose(fptr2);
@@ -1173,14 +1232,14 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 fptr3 = fopen("tmp8.txt", "w");
 
-                while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+                while(fscanf(fptr2, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                     if(!strcmp(ticketNumber, input)){
                         //Change number of travelers
-                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers + numOfTravelersModified);
+                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers + numOfTravelersModified, serverNumber, modifications);
                     }
 
                     else {
-                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                        fprintf(fptr3, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                     }
                 }
 
@@ -1204,14 +1263,14 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
             fptr2 = fopen("tmp9.txt", "w");
 
-            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers) != EOF){
+            while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
                 if(!strcmp(ticketNumber, input)){
                     if((numOfTravelers - numOfTravelersModified) > 0){
-                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers - numOfTravelersModified);
+                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers - numOfTravelersModified, serverNumber, modifications);
                         valid = 1;
                     }
                     else {
-                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                        fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                         memset(&message, '\0', sizeof(message));
                         sprintf(message, "\nCouldn't modify reservation. Can't remove more seats than the ones that were originally purchased.");
                         sendMessage(message, clientSocket);
@@ -1220,7 +1279,7 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
                 }
 
                 else {
-                    fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers);
+                    fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
                 }
             }
             fclose(fptr2);

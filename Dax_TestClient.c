@@ -12,6 +12,8 @@
 
 #define PORT 2224
 
+void readFile(int);
+
 int main()
 {
     int clientSocket, ret;
@@ -48,8 +50,6 @@ int main()
     {
         while(1)
         {
-            //memset(re, '\0', sizeof(re));
-            //printf("\n[-]Waiting to recive next thing...\n");
             if(recv(clientSocket, re, sizeof(re), 0)  == -1) //recieve client response
             {
                 printf("\n\n[-]Something Failed Recieving!\n\n");
@@ -57,7 +57,7 @@ int main()
             }
 
 
-            if(strcmp(re, "input") == 0 || strcmp(re, "exit") == 0) //Server needs user input
+            if(strcmp(re, "input") == 0 || strcmp(re, "exit") == 0 || strcmp(re, "file") == 0) //Server needs user input
             {
                 break;
             }
@@ -68,7 +68,14 @@ int main()
 
         if(strcmp(re, "exit") == 0)
         {
-            break;
+            printf("\n\n[+] Client Closing.\n\n");
+            return 0;
+        }
+        else if(strcmp(re, "file") == 0)
+        {
+            readFile(clientSocket);
+            continue;
+
         }
 
         printf("\n");
@@ -86,7 +93,36 @@ int main()
 
     }
 
-    printf("\n\n[+] Client Closing.\n\n");
-
     return 0;
+}
+
+
+void readFile(int clientSocket)
+{   
+    char fileName[256];
+
+    if(recv(clientSocket, fileName, sizeof(fileName), 0)  == -1) //recieve client response
+    {
+        printf("\n\n[-]Something Failed Recieving!\n\n");
+        exit(0);
+    }
+
+
+    char fileBuffer[5000];
+
+
+    if(recv(clientSocket, fileBuffer, sizeof(fileBuffer), 0)  == -1) //recieve client response
+    {
+        printf("\n\n[-]Something Failed Recieving!\n\n");
+        exit(0);
+    }
+
+    
+
+    FILE *reciept;
+
+    reciept = fopen(fileName, "w+");
+
+    fwrite(fileBuffer, sizeof(char), strlen(fileBuffer) + 1, reciept);
+    fclose(reciept);
 }

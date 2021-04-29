@@ -213,6 +213,9 @@ int connectionWithClient(int *s)
 {
     int clientSocket = *s;
 
+    sendMessage("Sending File...\n", clientSocket);
+    sendFile("It works!!\n:)", "hello", clientSocket);
+
     char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program"; //Menu Needs to be declared some where to send 
     char *userChoice;
     int choice;
@@ -318,6 +321,20 @@ char * clientInput(int clientSocket)
     printf("Recv: %s\n\n", clientResponse);
 
     return clientResponse;
+}
+
+void sendFile(char *contents, char *name, int clientSocket)
+{
+    sendMessage("file", clientSocket);
+    char fileName[100];
+    sprintf(fileName, "%sReciept.txt", name);
+    printf("file name: %s\n\n", fileName);
+    sendMessage(fileName, clientSocket);
+    
+    if(send(clientSocket, contents, 5000, 0) == -1)
+    {
+        printf("\n\n[-]Something Failed sending message!\n\n");
+    }
 }
 
 

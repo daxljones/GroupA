@@ -29,10 +29,13 @@ struct client{
     int dateOfTravel;
     int governmentIDNum;
     int numOfTravelers;
+    char modifications[100];
+    int serverNumber;
 };
 
 void sendMessage(char *, int);
 char * clientInput(int);
+void sendFile(char *, char *, int);
 void InquiryTicket(int);
 void MakingReservation(struct client *, int);
 void ModifyReservation(int);
