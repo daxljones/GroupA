@@ -33,6 +33,12 @@ struct client{
     int serverNumber;
 };
 
+typedef struct priorityPackage
+{
+    pthread_t tid;
+    int priority;
+}priorityPackage;
+
 void sendMessage(char *, int);
 char * clientInput(int);
 void sendFile(char *, char *, int);
@@ -55,6 +61,7 @@ void ChangeTravelDay(int, char *, int, int);
 void ChangeSeats(int, char *, int);
 
 static int readerCount;
+pthread_mutex_t pq;
 
 
 #include "Dax_Queue.c"

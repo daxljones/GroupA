@@ -17,10 +17,14 @@ void * threadFunc(void *);
 
 pthread_mutex_t lock[NUM_OF_SERVERS];
 
+priorityPackage priorityList[THREAD_NUM * NUM_OF_SERVERS];
+
 struct threadPackage{
     struct queue *q;
     int serverNum;
 };
+
+
 
 
 //==========================================
@@ -31,6 +35,7 @@ int main()
 {
     printf("Master Server starting...\n\n");
 
+    
     readerCount = 0;
 
     int i = 0;
@@ -48,6 +53,9 @@ int main()
         if (pthread_mutex_init(&lock[i], NULL) != 0)
             printf("Mutex init failed!\n");
     }
+
+    if (pthread_mutex_init(&pq, NULL) != 0)
+            printf("Mutex init failed!\n");
 
 
     for(i = 0; i < NUM_OF_SERVERS; i++)
@@ -93,6 +101,12 @@ void server(int portAdd)
 
     for(int i = 0; i < THREAD_NUM; i++)
     {
+        pthread_attr_t attr;
+        struct sched_param param;
+        pthread_attr_init (&attr);
+        pthread_attr_getschedparam (&attr, &param);
+        pthread_attr_setschedparam (&attr, &param);
+
         pthread_create(&pool[i], NULL, threadFunc, tp);
     }
 
@@ -189,6 +203,8 @@ void * threadFunc(void *package)
     int *socket;
     int s;
     socket = &s;
+
+
     
     while(1)
     {
@@ -337,4 +353,60 @@ void sendFile(char *contents, char *name, int clientSocket)
     }
 }
 
+
+//===============================
+//       Priority Methods
+//===============================
+
+
+void enterQueue(int numOfTickets, pthread_t thread)
+{
+    int *priority;
+    struct sched_param *param;
+
+    pthread_mutex_lock(&pq);
+    
+    for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
+    {
+        if(priorityList[i].tid == thread || priorityList[i].priority == 0)
+        {
+            priorityList[i].tid = thread;
+            priorityList[i].priority = numOfTickets;
+
+            pthread_getschedparam(thread, priority, param);
+            pthread_setschedparam(thread, priorityList[i].priority, param);
+        }
+    }
+    
+    pthread_mutex_unlock(&pq);
+}
+
+void takeOut(pthread_t thread)
+{
+    pthread_mutex_lock(&pq);
+    
+    for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
+    {
+        if(priorityList[i].priority != 0 && priorityList[i].tid == thread)
+        {
+            priorityList[i].priority = 0;
+        }
+    }
+
+    for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
+    {
+        int *priority;
+        struct sched_param *param;
+
+        if(priorityList[i].priority != 0)
+        {
+            priorityList[i].priority++;
+            pthread_getschedparam(thread, priority, param);
+            priorityList[i].priority = (*priority) + 1;
+            pthread_setschedparam(thread, priorityList[i].priority, param);
+        }
+    }
+    
+    pthread_mutex_unlock(&pq);
+}
 
