@@ -746,7 +746,6 @@ void DisplayReservation(int day, char input[], int clientSocket){
                 }
             }
 
-<<<<<<< HEAD
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nServer:\t\t%d", serverNumber);
             sendMessage(message, clientSocket);
@@ -754,9 +753,8 @@ void DisplayReservation(int day, char input[], int clientSocket){
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nModifications:\t%s", modifications);
             sendMessage(message, clientSocket);
-=======
+
             sendFile(fileContents, ticketNumber, clientSocket);
->>>>>>> b9702b3df7d7c56053a6f16ee28bd607202db63e
         }
 
         else {
