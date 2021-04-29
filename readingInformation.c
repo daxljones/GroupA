@@ -40,6 +40,7 @@ void MakeReservation(int clientSocket){
             sprintf(message, "\n\nYour reservation is being processed...\n");
             sendMessage(message, clientSocket);
 
+            
             enterQueue(customer.numOfTravelers, pthread_self());
 
             MakingReservation(&customer, clientSocket);

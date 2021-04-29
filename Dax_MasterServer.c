@@ -3,7 +3,6 @@
 
 
 #include "Definitions.h"
-#include <pthread.h>
 //#include <wait.h>
 
 void server(int);
@@ -374,6 +373,7 @@ void enterQueue(int numOfTickets, pthread_t thread)
             priorityList[i].priority = numOfTickets;
 
             pthread_getschedparam(thread, priority, param);
+            priorityList[i].priority = priorityList[i].priority + (*priority);
             pthread_setschedparam(thread, priorityList[i].priority, param);
         }
     }
@@ -383,7 +383,9 @@ void enterQueue(int numOfTickets, pthread_t thread)
 
 void takeOut(pthread_t thread)
 {
+    printf("---------BEFORE LOCK---------\n");
     pthread_mutex_lock(&pq);
+    printf("---------AFTER LOCK---------\n");
     
     for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
     {
@@ -402,7 +404,7 @@ void takeOut(pthread_t thread)
         {
             priorityList[i].priority++;
             pthread_getschedparam(thread, priority, param);
-            priorityList[i].priority = (*priority) + 1;
+            priorityList[i].priority = priorityList[i].priority + (*priority) + 1;
             pthread_setschedparam(thread, priorityList[i].priority, param);
         }
     }

@@ -13,6 +13,7 @@
 #include <sys/ipc.h>
 #include <time.h>
 #include <sys/wait.h>
+#include <pthread.h>
 #include "Queue.h"
 
 
@@ -42,6 +43,8 @@ typedef struct priorityPackage
 void sendMessage(char *, int);
 char * clientInput(int);
 void sendFile(char *, char *, int);
+void enterQueue(int, pthread_t);
+void takeOut(pthread_t);
 void InquiryTicket(int);
 void MakingReservation(struct client *, int);
 void ModifyReservation(int);
