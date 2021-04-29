@@ -268,6 +268,13 @@ int connectionWithClient(int *s)
     return 1;
 }
 
+
+
+
+//=============================================
+//            Server Communications
+//=============================================
+
 void sendMessage(char *message, int clientSocket)
 {
     if(send(clientSocket, message, 256, 0) == -1)
