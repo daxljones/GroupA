@@ -312,6 +312,9 @@ void CancelReservation(int clientSocket){
     char message[256];
     char *input;
 
+    //WRITING SEMAPHORE
+    sem_wait(write_sem);
+
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
         printf("Error! Could not open Day1.txt");
@@ -369,6 +372,8 @@ void CancelReservation(int clientSocket){
         if(match == 1){
             //Give seats back
             //sprintf(message, "\nInput before sending to remove seats: %s", input);
+
+            sem_post(write_sem);
 
             GiveSeatsBack(day, input);
             RemoveSeats(day, input);

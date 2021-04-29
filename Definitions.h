@@ -19,6 +19,9 @@
 #define WRITE "/write"
 #define READ "/read"
 
+sem_t *write_sem;
+sem_t *read_sem;
+
 struct client{
     char name[50];
     char DOB[50];
@@ -28,9 +31,6 @@ struct client{
     int numOfTravelers;
 };
 
-
-int readFile();
-void writeToFile();
 void sendMessage(char *, int);
 char * clientInput(int);
 void InquiryTicket(int);
@@ -50,9 +50,6 @@ void DisplayReservation(int, char *, int);
 void ChangeNumberTravelers(int,char *, int, int, int);
 void ChangeTravelDay(int, char *, int, int);
 void ChangeSeats(int, char *, int);
-
-sem_t *write_sem;
-sem_t *read_sem;
 
 static int readerCount;
 

@@ -1,12 +1,8 @@
 #include "Definitions.h"
 
 
-
-int readFile()
+void readFile()
 {
-    //char *info = malloc(sizeof(char) * 256);
-    int send;
-
     sem_wait(read_sem);
     readerCount++;
     if(readerCount == 1)
@@ -25,7 +21,7 @@ int readFile()
 
     sem_post(read_sem);
 
-    return send;
+
 }
 
 void writeToFile()

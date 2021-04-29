@@ -22,7 +22,6 @@ void SeatsAvailable(int seatsPurchased, char ticketNumber[], int dayOfTravel, in
     do {
         //Print Seats
         DisplaySeats(dayOfTravel, clientSocket);
-        printf("\nASKING FOR SEATS--\n");
 
         //Choosing seat
         //printf("\nPick seat for passanger #%d: ", count + 1);
@@ -140,6 +139,13 @@ void DisplaySeats(int dayOfTravel, int clientSocket){
 
     char message[256];
 
+    sem_wait(read_sem);
+    readerCount++;
+    if(readerCount == 1)
+        sem_wait(write_sem);
+    
+    sem_post(read_sem);
+
     //printf("\n\t\tAVAILBLE SEATS    DAY: %d\n\n", dayOfTravel);
     sprintf(message, "\n\t\tAVAILBLE SEATS    DAY: %d\n\n", dayOfTravel);
     sendMessage(message, clientSocket);
@@ -191,6 +197,14 @@ void DisplaySeats(int dayOfTravel, int clientSocket){
         sprintf(message, "\n");
         sendMessage(message, clientSocket);
         fclose(fptr);
+
+        wait(read_sem);
+        readerCount--;
+
+        if(readerCount == 0)
+            sem_post(write_sem);
+
+        sem_post(read_sem);
     }
 
     //Read from day 2
