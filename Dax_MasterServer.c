@@ -248,49 +248,43 @@ int connectionWithClient(int *s)
 {
     int clientSocket = *s;
 
-    char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program"; //Menu Needs to be declared some where to send 
-    char *userChoice;
-    int choice;
-    char message[256];
-    int num = 0;
+    // intialize menu
+    char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program\n\nOption:\n"; 
+    char *userChoice; //holds user response
+    int choice; // conversion of user response
+    char message[256]; // buffer to hold message
 
     while(1)
     {   
-        // Send menu
-        sendMessage(menu, clientSocket);
-        sendMessage("\n\nOption:\n", clientSocket);
+        sendMessage(menu, clientSocket); // Send menu
 
-        userChoice = clientInput(clientSocket);
+        userChoice = clientInput(clientSocket); // get user input
         
-        choice = atoi(userChoice); //conversion of choice from string to int
-
-        printf("\n\nuserchoice: %d\n\n", choice);
-
+        choice = atoi(userChoice); //conversion of user choice from string to int
        
-        memset(message, 0, sizeof(message));
-        switch (choice)
+        switch (choice) // dictates action based on user choice
         {
              case 1:
-                MakeReservation(clientSocket);
+                MakeReservation(clientSocket); // execute making reservation
                 break;
 
             case 2:
-                InquiryTicket(clientSocket);
+                InquiryTicket(clientSocket); //executing inquiry 
                 break;
 
             case 3:
-                ModifyReservation(clientSocket);
+                ModifyReservation(clientSocket); // execute modifying reservation
                 break;
 
             case 4:
-                CancelReservation(clientSocket);
+                CancelReservation(clientSocket); // cancel reservation
                 break;
             case 5:
-                sendMessage("exit", clientSocket);
-                sendMessage("\n\nGoodbye!\n", clientSocket);
+                sendMessage("\n\nGoodbye!\n", clientSocket); // say goodbye to client
+                sendMessage("exit", clientSocket); // confirm with user about exit
                 return 0;
             default:
-                sendMessage("Please enter a valid option.\n", clientSocket);
+                sendMessage("Please enter a valid option.\n", clientSocket); // tell client about wrong choice
                 break;
         }
 
@@ -298,7 +292,7 @@ int connectionWithClient(int *s)
 
     printf("Now leaving...\n\n");
     
-    close(clientSocket);
+    close(clientSocket); // close client socket
 
     return 1;
 }
@@ -310,22 +304,33 @@ int connectionWithClient(int *s)
 //            Server Communications
 //=============================================
 
+/*
+    void sendMessage(char *, int): Used to accept string and send to client in uniform design
+
+    Parameters:
+        message: The message to be sent to client
+        clientSocket: Socket to be sent to
+*/
 void sendMessage(char *message, int clientSocket)
 {
-    if(send(clientSocket, message, 256, 0) == -1)
+    if(send(clientSocket, message, 256, 0) == -1) //send message
     {
         printf("\n\n[-]Something Failed sending message!\n\n");
     }
     printf("Sent: %s\n\n", message);
 }
 
+/*
+    char * clientInput(int): Method to easily request client input and return response
+
+    Parameters:
+        clientSocket: Socket to be swork with
+*/
 char * clientInput(int clientSocket)
 {
-    char *clientResponse = malloc(sizeof(char) * 256);
+    char *clientResponse = malloc(sizeof(char) * 256); // prepare message to be returned
 
-    //sleep(2);
-
-    sendMessage("input", clientSocket);
+    sendMessage("input", clientSocket); // tell client servers is asking for input
     
 
     if(recv(clientSocket, clientResponse, 256, 0)  == -1) //recieve client response
@@ -334,6 +339,7 @@ char * clientInput(int clientSocket)
         return NULL;
     }
 
+    // Remove \n if it exist
     char c;
 
     for(int i = 0; i < 256; ++i)
@@ -355,15 +361,22 @@ char * clientInput(int clientSocket)
     return clientResponse;
 }
 
+/*
+    void sendFile(char *, char *, int): Used to send client a file
+
+    Parameters:
+        contents: Contents of file to be sent
+        name: name of file for client
+        clientSocket: Socket to be used
+*/
 void sendFile(char *contents, char *name, int clientSocket)
 {
-    sendMessage("file", clientSocket);
-    char fileName[100];
-    sprintf(fileName, "%sReciept.txt", name);
-    printf("file name: %s\n\n", fileName);
-    sendMessage(fileName, clientSocket);
+    sendMessage("file", clientSocket); //tell client tp prepare for file
+    char fileName[100]; 
+    sprintf(fileName, "%sReciept.txt", name); // set up file name
+    sendMessage(fileName, clientSocket); //send file name to client
     
-    if(send(clientSocket, contents, 5000, 0) == -1)
+    if(send(clientSocket, contents, 5000, 0) == -1) //send file to client
     {
         printf("\n\n[-]Something Failed sending message!\n\n");
     }
@@ -374,62 +387,73 @@ void sendFile(char *contents, char *name, int clientSocket)
 //       Priority Methods
 //===============================
 
+/*
+    void enterQueue(int, char *): Enters calling thread into an array based on num of 
+    passengers as priority and creates semaphore based on thread provided code.
 
+    Parameters:
+        numOfTickets: number of tickets thread has, used as priority
+        code: thread provided code to use as semaphore code
+*/
 void enterQueue(int numOfTickets, char *code)
-{
-    int priority;
-            printf("-----DEBUG: %s----\n", code);
-    
-    pthread_mutex_lock(&pq);
-            printf("-----DEBUG 1 : %s----\n", code);
+{   
+    pthread_mutex_lock(&pq); //accessing list so don't allow anyone else
 
-    for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
+    for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i) // go through array to find first available slot
     {
-        if(priorityList[i].code == NULL)
+        if(priorityList[i].code == NULL) // check if slot is null
         {
-            priorityList[i].code = code;
+            priorityList[i].code = code; // store info
             priorityList[i].priority = numOfTickets;
         }
     }
-    sem_t *createsemaphore;
+    //create semaphore based on code
+    sem_t *createsemaphore; 
     sem_unlink(code);
     createsemaphore = sem_open(WRITE, IPC_CREAT, 0660, 0);
 
     pthread_mutex_unlock(&pq);
 }
 
+/*
+    void masterThread(void *): Over arching thread that checks list for threads waiting to
+    make a reservation. Checks which thread has the highest priority and then opens semaphore
+    based on its code. Ups the priority on all unchosen threads to prevent starvation.
+*/
 void * masterThread(void *p)
 {
-    int max = 0;
-    int index = 0;
+    int max = 0; // used to keep track of max priority
+    int index = 0; // index of highest priority thread
 
     while(1)
     {
-        max = 0;
+        max = 0; // reset variables
         index = 0;
 
         pthread_mutex_lock(&pq);
 
 
-        for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
+        for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i) // check all slots in array
         {
-            if(priorityList[i].code != NULL && priorityList[i].priority > max)
+            if(priorityList[i].code != NULL && priorityList[i].priority > max) //check if not null and is greater than max
             {
-                index = i;
-                max = priorityList[i].priority;
+                index = i; // set index
+                max = priorityList[i].priority; // set max priority
             }
         }
 
-        if(max > 0)
+        if(max > 0) // check if there was anything in queue
         {
+            //open semaphore based on code of highest priority
             sem_t *opensem;
             opensem = sem_open(priorityList[index].code, 0, 0660, 0);
             sem_post(opensem);
 
+            //set that index to null
             priorityList[index].code = NULL;
             priorityList[index].priority = 0;
 
-            for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
+            for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i) // go through and up each threads priority that didn't get picked
             {
                 if(priorityList[i].code != NULL)
                 {
