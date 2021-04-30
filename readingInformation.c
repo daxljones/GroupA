@@ -24,9 +24,9 @@ char code[7];
 
 
 //Read
-void MakeReservation(int clientSocket){
+void MakeReservation(int clientSocket, int serverNumber){
     struct client customer;
-    customer = passangerInformation(clientSocket);
+    customer = passangerInformation(clientSocket, serverNumber);
     char *confirmation;
 
     char message[256];
@@ -76,7 +76,7 @@ void MakeReservation(int clientSocket){
 }
 
 //Read
-struct client passangerInformation(int clientSocket){
+struct client passangerInformation(int clientSocket, int serverNumber){
     struct client customer;
     char *confirmation;
     char message[256];
@@ -127,7 +127,7 @@ struct client passangerInformation(int clientSocket){
     free(confirmation);
 
     //Adding server number and modifications
-    customer.serverNumber = 0;
+    customer.serverNumber = serverNumber;
     strcpy(customer.modifications, "None");
 
     return customer;
@@ -771,10 +771,12 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nServer:\t\t%d", serverNumber);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nModifications:\t%s", modifications);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             sendFile(fileContents, ticketNumber, clientSocket);
@@ -813,44 +815,54 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\n\tRESERVATION INFO\n");
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nTicket Number: \t%s", &ticketNumber);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nName:\t\t%s", &name);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nDOB:\t\t%s", &DOB);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nGender:\t\t%s", &gender);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nID Number:\t%d", idNumber);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nNum of Travels: %d", numOfTravelers);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nDay:\t\t%d", day);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nSeats:\t\t");
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             while(fscanf(fptr1, "%s\t%d\n", ticketNumber, &seat) != EOF){
                 if(!strcmp(ticketNumber, input)){
                     memset(&message, '\0', sizeof(message));
                     sprintf(message, "%d ", seat);
+                    strcat(fileContents, message);
                     sendMessage(message, clientSocket);
 
                 }
@@ -858,10 +870,12 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nServer:\t\t%d", serverNumber);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\nModifications:\t%s", modifications);
+            strcat(fileContents, message);
             sendMessage(message, clientSocket);
 
         }
