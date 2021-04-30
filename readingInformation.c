@@ -19,9 +19,12 @@ int main(int argc, char *argv[])
 }
 */
 
+char *code;
+
+
 
 //Read
-void MakeReservation(int clientSocket, pthread_t me){
+void MakeReservation(int clientSocket){
     struct client customer;
     customer = passangerInformation(clientSocket);
     char *confirmation;
@@ -40,10 +43,11 @@ void MakeReservation(int clientSocket, pthread_t me){
             sprintf(message, "\n\nYour reservation is being processed...\n");
             sendMessage(message, clientSocket);
 
-            
-            enterQueue(customer.numOfTravelers, me);
 
-            MakingReservation(&customer, clientSocket, me);
+            sprintf(code, "/%s", randomTicketGeneration);
+            enterQueue(customer.numOfTravelers, code);
+
+            MakingReservation(&customer, clientSocket, code);
             memset(&message, '\0', sizeof(message));
             sprintf(message, "\n\nYour reservation has been completed!\n");
             sendMessage(message, clientSocket);
@@ -218,9 +222,8 @@ void InquiryTicket(int clientSocket){
 }
 
 //Writing
-void MakingReservation(struct client *customer, int clientSocket, pthread_t me){
+void MakingReservation(struct client *customer, int clientSocket, char *code){
     //Generate random ticket number, right now same ticket number for all of them
-
     char message[256];
 
     char *ticketPtr = randomTicketGeneration();
@@ -229,9 +232,12 @@ void MakingReservation(struct client *customer, int clientSocket, pthread_t me){
     ticketNumber[strlen(ticketNumber) + 1] = '\0';
 
     //char ticketNumber[] = "OSU1234";
+    sem_t *mysem;
+    mysem = sem_open(code, 0, 0660, 0);
+    sem_wait(mysem);
 
-    //---------------------PUT WRITING SEMPHORE HERE-----------------------
-    takeOut(me);
+    //-------------PUT WRITE SEMAPHORE HERE--------------------
+    sem_unlink(code);
 
     int dayOfTravel = customer->dateOfTravel;
     if(dayOfTravel == 1){

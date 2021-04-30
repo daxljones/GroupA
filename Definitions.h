@@ -36,19 +36,19 @@ struct client{
 
 typedef struct priorityPackage
 {
-    pthread_t tid;
+    char *code;
     int priority;
 }priorityPackage;
 
 void sendMessage(char *, int);
 char * clientInput(int);
 void sendFile(char *, char *, int);
-void enterQueue(int, pthread_t);
+void enterQueue(int, char *);
 void takeOut(pthread_t);
 void InquiryTicket(int);
-void MakingReservation(struct client *, int, pthread_t);
+void MakingReservation(struct client *, int, char *);
 void ModifyReservation(int);
-void MakeReservation(int, pthread_t);
+void MakeReservation(int);
 struct client passangerInformation(int);
 void SeatsAvailable(int, char *, int, int);
 char* randomTicketGeneration(void);

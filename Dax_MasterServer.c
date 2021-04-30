@@ -6,10 +6,11 @@
 //#include <wait.h>
 
 void server(int);
-int connectionWithClient(int *, pthread_t);
+int connectionWithClient(int *);
 void * threadFunc(void *);
+void * masterThread(void *);
 
-#define BASEPORT 2224
+#define BASEPORT 2225
 #define NUM_OF_SERVERS 1
 #define THREAD_NUM 1
 
@@ -56,6 +57,9 @@ int main()
     if (pthread_mutex_init(&pq, NULL) != 0)
             printf("Mutex init failed!\n");
 
+    pthread_t mstrthr;
+    pthread_create(&mstrthr, NULL, masterThread, NULL);
+
 
     for(i = 0; i < NUM_OF_SERVERS; i++)
     {
@@ -100,12 +104,6 @@ void server(int portAdd)
 
     for(int i = 0; i < THREAD_NUM; i++)
     {
-        pthread_attr_t attr;
-        struct sched_param param;
-        pthread_attr_init (&attr);
-        pthread_attr_getschedparam (&attr, &param);
-        pthread_attr_setschedparam (&attr, &param);
-
         pthread_create(&pool[i], NULL, threadFunc, tp);
     }
 
@@ -213,7 +211,7 @@ void * threadFunc(void *package)
         if(*socket != -1)
         {
             pthread_t me = pthread_self();
-            connectionWithClient(socket, me);
+            connectionWithClient(socket);
         }
         free(socket);
         
@@ -223,7 +221,7 @@ void * threadFunc(void *package)
 }
 
 
-int connectionWithClient(int *s, pthread_t me)
+int connectionWithClient(int *s)
 {
     int clientSocket = *s;
 
@@ -253,7 +251,7 @@ int connectionWithClient(int *s, pthread_t me)
         switch (choice)
         {
              case 1:
-                MakeReservation(clientSocket, me);
+                MakeReservation(clientSocket);
                 break;
 
             case 2:
@@ -313,7 +311,7 @@ char * clientInput(int clientSocket)
     if(recv(clientSocket, clientResponse, 256, 0)  == -1) //recieve client response
     {
         printf("\n\n[-]Something Failed Recieving!\n\n");
-        return -1;
+        return NULL;
     }
 
     char c;
@@ -357,59 +355,68 @@ void sendFile(char *contents, char *name, int clientSocket)
 //===============================
 
 
-void enterQueue(int numOfTickets, pthread_t thread)
+void enterQueue(int numOfTickets, char *code)
 {
-    int *priority;
-    struct sched_param *param;
+    int priority;
     
     pthread_mutex_lock(&pq);
+
     for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
     {
-        if(priorityList[i].tid == thread || priorityList[i].priority == 0)
+        if(priorityList[i].code == NULL)
         {
-            printf("---------HERE  1 %d---------\n", thread);
-            priorityList[i].tid = thread;
+            priorityList[i].code = code;
             priorityList[i].priority = numOfTickets;
-
-            pthread_getschedparam(thread, priority, param);
-            printf("---------HERE 2 %d---------\n", thread);
-
-            priorityList[i].priority = priorityList[i].priority + (*priority);
-            pthread_setschedparam(thread, priorityList[i].priority, param);
         }
     }
-    
+    sem_t *createsemaphore;
+    sem_unlink(code);
+    createsemaphore = sem_open(WRITE, IPC_CREAT, 0660, 0);
+
     pthread_mutex_unlock(&pq);
 }
 
-void takeOut(pthread_t thread)
+void * masterThread(void *p)
 {
-    printf("---------BEFORE LOCK---------\n");
-    pthread_mutex_lock(&pq);
-    printf("---------AFTER LOCK---------\n");
-    
-    for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
-    {
-        if(priorityList[i].priority != 0 && priorityList[i].tid == thread)
-        {
-            priorityList[i].priority = 0;
-        }
-    }
+    int max = 0;
+    int index = 0;
 
-    for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
+    while(1)
     {
-        int *priority;
-        struct sched_param *param;
+        max = 0;
+        index = 0;
 
-        if(priorityList[i].priority != 0)
+        pthread_mutex_lock(&pq);
+
+
+        for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
         {
-            priorityList[i].priority++;
-            pthread_getschedparam(thread, priority, param);
-            priorityList[i].priority = priorityList[i].priority + (*priority) + 1;
-            pthread_setschedparam(thread, priorityList[i].priority, param);
+            if(priorityList[i].code != NULL && priorityList[i].priority > max)
+            {
+                index = i;
+                max = priorityList[i].priority;
+            }
         }
+
+        if(max > 0)
+        {
+            sem_t *opensem;
+            opensem = sem_open(priorityList[index].code, 0, 0660, 0);
+            sem_post(opensem);
+
+            priorityList[index].code = NULL;
+            priorityList[index].priority = 0;
+
+            for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
+            {
+                if(priorityList[i].code != NULL)
+                {
+                    priorityList[i].priority++;
+                }
+            }
+        }
+
+        pthread_mutex_unlock(&pq);
     }
-    
-    pthread_mutex_unlock(&pq);
 }
 
