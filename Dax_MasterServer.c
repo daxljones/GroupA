@@ -2,23 +2,24 @@
 //        ./start
 
 
-#include "Definitions.h"
-//#include <wait.h>
+#include "Definitions.h" //needed for all user files
+//#include <wait.h> //UNCOMMENT THIS INLCUDE IF USING LINUX
 
-void server(int);
+//prototypes for server use only
+void server(int); 
 int connectionWithClient(int *);
 void * threadFunc(void *);
 void * masterThread(void *);
 
-#define BASEPORT 2220
-#define NUM_OF_SERVERS 1
-#define THREAD_NUM 1
+#define BASEPORT 2220 //base port all server will work off of
+#define NUM_OF_SERVERS 1 //num of servers
+#define THREAD_NUM 1 //num of threads for each server
 
+pthread_mutex_t lock[NUM_OF_SERVERS]; //mutex lock for each server
 
-pthread_mutex_t lock[NUM_OF_SERVERS];
+priorityPackage priorityList[THREAD_NUM * NUM_OF_SERVERS]; // list that reserves a spot for each possible thread for priority
 
-priorityPackage priorityList[THREAD_NUM * NUM_OF_SERVERS];
-
+//struct needed to send info to threads
 struct threadPackage{
     struct queue *q;
     int serverNum;
@@ -31,14 +32,17 @@ struct threadPackage{
 //              Master Server
 //==========================================
 
+/*
+    Main Server execution: Sets up every thing needed for server actions.
+*/
 int main()
 {
     printf("Master Server starting...\n\n");
 
     
-    readerCount = 0;
+    readerCount = 0; // intializes reader count
 
-    int i = 0;
+    int i = 0; 
     pid_t pid;
 
     //set up semaphores
@@ -48,19 +52,22 @@ int main()
     write_sem = sem_open(WRITE, IPC_CREAT, 0660, 1);
     read_sem = sem_open(READ, IPC_CREAT, 0660, 1);
 
+    //intialize mutex locks
     for(i = 0; i < NUM_OF_SERVERS; i++)
     {
         if (pthread_mutex_init(&lock[i], NULL) != 0)
             printf("Mutex init failed!\n");
     }
 
+    //intialize mutex lock for prioirty list
     if (pthread_mutex_init(&pq, NULL) != 0)
             printf("Mutex init failed!\n");
 
+    //create thread to handle priority
     pthread_t mstrthr;
     pthread_create(&mstrthr, NULL, masterThread, NULL);
 
-
+    //create servers
     for(i = 0; i < NUM_OF_SERVERS; i++)
     {
         pid = fork();
@@ -69,9 +76,10 @@ int main()
             server(i);
     }
     
-
+    //wait until all children are done
     while(wait(NULL) != -1){;} 
 
+    //close semaphores
     sem_close(write_sem);
     sem_close(read_sem);
 
@@ -84,7 +92,10 @@ int main()
 //              Servers
 //==========================================
 
-
+/*
+     void server(): Method ran by children to act as servers. Sets up TCP sockets
+     and accepts clients. Creates a thread pool that will take connections.
+*/
 void server(int portAdd)
 {
     printf("Server %d starting...\n\n", portAdd + 1);
@@ -92,16 +103,19 @@ void server(int portAdd)
     //----------------------------
     //Create Thread Pool and Queue
     //----------------------------
+
+    //prepare thread package
     struct threadPackage *tp;
     struct threadPackage package;
     tp = &package;    
+    
+    pthread_t *pool = malloc(sizeof(pthread_t) * THREAD_NUM); //declare thread array
+    struct queue *q = createQueue(); // create queue
 
-    pthread_t *pool = malloc(sizeof(pthread_t) * THREAD_NUM);
-    struct queue *q = createQueue();
+    tp->serverNum = portAdd; //set server num
+    tp->q = q; // set queue reference
 
-    tp->serverNum = portAdd;
-    tp->q = q;
-
+    // run all threads in pool
     for(int i = 0; i < THREAD_NUM; i++)
     {
         pthread_create(&pool[i], NULL, threadFunc, tp);
@@ -154,13 +168,15 @@ void server(int portAdd)
         exit(1);
     }
 
+
     //---------------------
     //Taking in Connections
     //---------------------
+
     printf("--Will now be accepting clients...\n\n");
     while(1)
     {
-        newSocket = accept(sockfd, (struct sockaddr *)&newAddr, &addr_size);
+        newSocket = accept(sockfd, (struct sockaddr *)&newAddr, &addr_size); //wait for clients
         if(newSocket < 0)
         {
             printf("Error for new socket\n");
@@ -169,10 +185,11 @@ void server(int portAdd)
         
         printf("Connection Accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
 
-        int *pclient = malloc(sizeof(int));
+        int *pclient = malloc(sizeof(int)); // pass socket info to new variable in heap
         *pclient = newSocket;
 
-        pthread_mutex_lock(&lock[portAdd]);
+        // add client to queue in controlled lock
+        pthread_mutex_lock(&lock[portAdd]); 
         enqueue(q, pclient);
         pthread_mutex_unlock(&lock[portAdd]);
     }
@@ -189,31 +206,37 @@ void server(int portAdd)
 //              Thread Jobs
 //==========================================
 
+/*
+     void * threadFunc(void *package): Method ran by threads in a pool. Infinitely run checking for new things in queue.
+     On client connection, continue on to handling client.
 
+     Parameters: 
+        void *package: Package sent by Server holding needed info
+*/
 void * threadFunc(void *package)
 {
     printf("Thread Created!\n");
 
     struct threadPackage *tp;
-    tp = (struct threadPackage *)package;
+    tp = (struct threadPackage *)package; // Cast void * into threadPackage
     
     int *socket;
     int s;
     socket = &s;
     
     while(1)
-    {
+    {   
+        //Attempt taking connection off queue in controlled access
         pthread_mutex_lock(&lock[tp->serverNum]);
         socket = dequeue(tp->q);
         pthread_mutex_unlock(&lock[tp->serverNum]);
 
-        //printf("%d\n", *socket);
-        if(*socket != -1)
+
+        if(*socket != -1) //check if anything was pulled off
         {
-            pthread_t me = pthread_self();
-            connectionWithClient(socket);
+            connectionWithClient(socket); // execute handling with clients
         }
-        free(socket);
+        free(socket); //Free socket since it's not needed
         
     }
 
@@ -224,9 +247,6 @@ void * threadFunc(void *package)
 int connectionWithClient(int *s)
 {
     int clientSocket = *s;
-
-    sendMessage("Sending File...\n", clientSocket);
-    sendFile("It works!!\n:)", "hello", clientSocket);
 
     char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program"; //Menu Needs to be declared some where to send 
     char *userChoice;
