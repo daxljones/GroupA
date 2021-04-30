@@ -3,9 +3,9 @@
 // ayrton.ledesma_fuentes@okstate.edu
 
 // This file was modified by all three members
+// (About 1,100 lines) Ayrton implemented reading and writing system to summary files
 // (About 250 lines) Dax implemented message passing lines between client and server
-// (About 100 lines) Ryan implemented semaphores
-// (About 1,200 lines) Ayrton implemented reading and writing system to summary files
+// (About 200 lines) Ryan implemented semaphores and modified text for the modifications field
 
 #include "Definitions.h"
 

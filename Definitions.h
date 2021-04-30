@@ -70,9 +70,9 @@ pthread_mutex_t pq;
 
 #include "Dax_Queue.c"
 #include "Dax_ReadWriteSync.c"
-#include "readingInformation.c"
-#include "RetrievingSeats.c"
-#include "SeatsAvailable.c"
+#include "Ayrton_ReadingInformation.c"
+#include "Isennock_RetrievingSeats.c"
+#include "Isennock_SeatsAvailable.c"
 
 
 #endif
