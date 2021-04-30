@@ -1,11 +1,5 @@
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>'
-#include <string.h>
-
-void GiveSeatsBack(int day, char input[]);
-void RemoveSeats(int day, char input[]);
+#include "Definitions.h"
 
 /*
 int main()
@@ -26,7 +20,7 @@ int main()
 
 
 void RemoveSeats(int day, char input[]){
-    char *ticketNumber[10];
+    char ticketNumber[10];
     //printf("\nCalling from Remove Seats");
     //printf("\nInput received: %s Length: %d", input, strlen(input));
 
@@ -96,7 +90,7 @@ void RemoveSeats(int day, char input[]){
 }
 
 void GiveSeatsBack(int day, char input[]){
-    char *ticketNumber[10];
+    char ticketNumber[10];
 
     if(day == 1){
         FILE *fptr1, *fptr2, *fptr3;
