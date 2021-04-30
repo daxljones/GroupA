@@ -40,7 +40,7 @@ void MakeReservation(int clientSocket, pthread_t me){
             sprintf(message, "\n\nYour reservation is being processed...\n");
             sendMessage(message, clientSocket);
 
-            
+
             enterQueue(customer.numOfTravelers, me);
 
             MakingReservation(&customer, clientSocket, me);
@@ -581,7 +581,7 @@ void ChangeSeats(int day, char input[], int clientSocket){
 
     if(day == 1){
         FILE *fptr1;
-        //Open Seats_History2
+        //Open Seats_History1
         if ((fptr1 = fopen("Seats1_History.txt", "r")) == NULL) {
             printf("Error! Could not open Day1.txt");
             exit(1);
@@ -608,6 +608,12 @@ void ChangeSeats(int day, char input[], int clientSocket){
 
         //Allow user to pick new seats
         SeatsAvailable(seatsFound, ticketNumber, day, clientSocket);
+
+        //------> Changing modifications from None to ChangedSeats 4/29/2021 @ 7:15pm
+        char newModificationText[] = "ChangedSeats";
+        UpdateModificationText(day, ticketNumber, newModificationText);
+
+        //------>
 
         //Display final reservation
         DisplayReservation(day, ticketNumber, clientSocket);
@@ -642,6 +648,11 @@ void ChangeSeats(int day, char input[], int clientSocket){
 
         //Allow user to pick new seats
         SeatsAvailable(seatsFound, ticketNumber, day, clientSocket);
+
+        //------> Changing modifications from None to ChangedSeats 4/29/2021 @ 7:30pm
+        char newModificationText[] = "ChangedSeats";
+        UpdateModificationText(day, ticketNumber, newModificationText);
+        //----->
 
         //Display final reservation
         DisplayReservation(day, ticketNumber, clientSocket);
@@ -976,6 +987,12 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
 
             //ALLOW USER TO PICK NEW SEATS - IN DAY 2
             SeatsAvailable(numOfTravelers, ticketNumber, day, clientSocket);
+
+            //------> Changing modifications from None to ChangedSeats 4/29/2021 @ 7:30pm
+            char newModificationText[] = "ChangedTravelDay";
+            UpdateModificationText(day, ticketNumber, newModificationText);
+            //----->
+
             DisplayReservation(day, input, clientSocket);
         }
     }
@@ -1064,6 +1081,11 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
 
             //ALLOW USER TO PICK NEW SEATS - IN DAY 2
             SeatsAvailable(numOfTravelers, ticketNumber, day, clientSocket);
+
+            //------> Changing modifications from None to ChangedSeats 4/29/2021 @ 7:30pm
+            char newModificationText[] = "ChangedTravelDay";
+            UpdateModificationText(day, ticketNumber, newModificationText);
+            //----->
             DisplayReservation(day, input, clientSocket);
         }
     }
@@ -1146,6 +1168,12 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 //Allow user to pick new seats
                 SeatsAvailable(numOfTravelersModified, input, day, clientSocket);
+
+                //------> Changing modifications from None to ChangedSeats 4/29/2021 @ 7:30pm
+                char newModificationText[] = "ChangedTravelersNumber";
+                UpdateModificationText(day, ticketNumber, newModificationText);
+                //----->
+
                 DisplayReservation(day, input, clientSocket);
             }
         }
@@ -1189,6 +1217,11 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 //ALLOW USER TO PICK NEW SEATS
                 SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day, clientSocket);
+
+                //------> Changing modifications from None to ChangedSeats 4/29/2021 @ 7:30pm
+                char newModificationText[] = "ChangedTravelersNumber";
+                UpdateModificationText(day, ticketNumber, newModificationText);
+                //----->
                 DisplayReservation(day, input, clientSocket);
             }
         }
@@ -1254,6 +1287,12 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 //Allow user to pick new seats
                 SeatsAvailable(numOfTravelersModified, input, day, clientSocket);
+
+                //------> Changing modifications from None to ChangedSeats 4/29/2021 @ 7:30pm
+                char newModificationText[] = "ChangedTravelersNumber";
+                UpdateModificationText(day, ticketNumber, newModificationText);
+                //----->
+
                 DisplayReservation(day, input, clientSocket);
             }
         }
@@ -1298,6 +1337,11 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 //ALLOW USER TO PICK NEW SEATS
                 SeatsAvailable(numOfTravelers - numOfTravelersModified, ticketNumber, day, clientSocket);
+
+                //------> Changing modifications from None to ChangedSeats 4/29/2021 @ 7:30pm
+                char newModificationText[] = "ChangedTravelersNumber";
+                UpdateModificationText(day, ticketNumber, newModificationText);
+                //----->
                 DisplayReservation(day, input, clientSocket);
             }
         }
@@ -1313,6 +1357,67 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
     else {
         printf("\nDebug: Not a valid day to travel - Change number of travelers");
 
+    }
+}
+
+void UpdateModificationText(int day, char input[], char newModificationText[]){
+    FILE *fptr1, *fptr2;
+
+    char ticketNumber[10];
+    char *name[500];
+    char *DOB[10];
+    char *gender[10];
+    int idNumber;
+    int numOfTravelers;
+    char *modifications[100];
+    int serverNumber;
+
+    if(day == 1){
+        if ((fptr1 = fopen("Day1.txt", "r")) == NULL) {
+            printf("Error! Could not open Day1.txt - UpdateModificationText");
+            exit(1);
+        }
+
+        fptr2 = fopen("tmp10.txt", "w");
+
+        while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                //Change modification text
+                fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, newModificationText);
+            }
+
+            else {
+                fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
+            }
+        }
+        fclose(fptr2);
+        fclose(fptr1);
+        remove("Day1.txt");
+        rename("tmp10.txt", "Day1.txt");
+    }
+
+    else if(day == 2){
+        if ((fptr1 = fopen("Day2.txt", "r")) == NULL) {
+            printf("Error! Could not open Day2.txt - UpdateModificationText");
+            exit(1);
+        }
+
+        fptr2 = fopen("tmp10.txt", "w");
+
+        while(fscanf(fptr1, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
+            if(!strcmp(ticketNumber, input)){
+                fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, newModificationText);
+            }
+
+            else {
+                fprintf(fptr2, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\r\n", ticketNumber, name, DOB, gender, idNumber, numOfTravelers, serverNumber, modifications);
+            }
+        }
+
+        fclose(fptr2);
+        fclose(fptr1);
+        remove("Day2.txt");
+        rename("tmp10.txt", "Day2.txt");
     }
 }
 
