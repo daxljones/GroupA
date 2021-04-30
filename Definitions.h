@@ -62,6 +62,7 @@ void DisplayReservation(int, char *, int);
 void ChangeNumberTravelers(int,char *, int, int, int);
 void ChangeTravelDay(int, char *, int, int);
 void ChangeSeats(int, char *, int);
+void UpdateModificationText(int, char *, char *);
 
 static int readerCount;
 pthread_mutex_t pq;
