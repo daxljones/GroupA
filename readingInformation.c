@@ -176,6 +176,13 @@ void InquiryTicket(int clientSocket){
 
         input = clientInput(clientSocket);
 
+        //Semaphore
+        sem_wait(read_sem);
+            readerCount++;
+        if(readerCount == 1)
+            sem_wait(write_sem);
+        sem_post(read_sem);
+
         while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
             if(!strcmp(ticketNumber, input)){
                 //Add char function: Look for tickets chosen in Seats1_History
@@ -219,6 +226,15 @@ void InquiryTicket(int clientSocket){
 
     free(input);
     fclose(fptr);
+
+    //Closing semaphore
+    wait(read_sem);
+    readerCount--;
+
+    if(readerCount == 0)
+        sem_post(write_sem);
+
+    sem_post(read_sem);
 }
 
 //Writing
@@ -237,6 +253,8 @@ void MakingReservation(struct client *customer, int clientSocket, char *code){
     sem_wait(mysem);
 
     //-------------PUT WRITE SEMAPHORE HERE--------------------
+    sem_wait(write_sem);
+
     sem_unlink(code);
 
     int dayOfTravel = customer->dateOfTravel;
@@ -264,6 +282,8 @@ void MakingReservation(struct client *customer, int clientSocket, char *code){
         //fprintf(f, "%s\t%s\t%s\t%s\t%d\t%d\r\n", ticketNumber, customer->name, customer->DOB, customer->gender, customer->governmentIDNum, customer->numOfTravelers);
         fclose(f);
     }
+
+    sem_post(write_sem);
 
     //Allow user to pick seats
     SeatsAvailable(customer->numOfTravelers, ticketNumber, customer->dateOfTravel, clientSocket);
@@ -338,7 +358,7 @@ void CancelReservation(int clientSocket){
     int serverNumber;
 
     //WRITING SEMAPHORE
-    sem_wait(write_sem);
+    //sem_wait(write_sem);
 
 
     if ((fptr = fopen("Day1.txt", "r")) == NULL) {
@@ -359,6 +379,8 @@ void CancelReservation(int clientSocket){
         if(input == "1"){
             break;
         }
+
+        //sem_wait(write_sem);
 
         //Look for ticket number in Day 1
         while(fscanf(fptr, "%s\t%[^\n^\t]%*c\t%s\t%s\t%d\t%d\t%d\t%s\n", ticketNumber, name, DOB, gender, &idNumber, &numOfTravelers, &serverNumber, modifications) != EOF){
@@ -398,8 +420,6 @@ void CancelReservation(int clientSocket){
             //Give seats back
             //sprintf(message, "\nInput before sending to remove seats: %s", input);
 
-            sem_post(write_sem);
-
             GiveSeatsBack(day, input);
             RemoveSeats(day, input);
 
@@ -427,6 +447,10 @@ void CancelReservation(int clientSocket){
         remove("Day2.txt");
         rename("tmp1.txt", "Day2.txt");
     }
+
+    //Closing semaphore
+    //sem_post(write_sem);
+
     memset(&message, '\0', sizeof(message));
     sprintf(message, "\n\nYour reservation has been canceled!");
     sendMessage(message, clientSocket);
@@ -691,6 +715,13 @@ void DisplayReservation(int day, char input[], int clientSocket){
     char message[256];
     char fileContents[5000];
 
+    //Opening Semaphore
+    sem_wait(read_sem);
+    readerCount++;
+    if(readerCount == 1)
+        sem_wait(write_sem);
+    sem_post(read_sem);
+
 
     if(day == 1){
         if ((fptr = fopen("Day1.txt", "r")) == NULL) {
@@ -791,6 +822,14 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
         fclose(fptr);
         fclose(fptr1);
+
+        //Closing semaphores
+        wait(read_sem);
+        readerCount--;
+
+        if(readerCount == 0)
+            sem_post(write_sem);
+        sem_post(read_sem);
     }
 
     else if(day == 2){
@@ -889,6 +928,14 @@ void DisplayReservation(int day, char input[], int clientSocket){
 
         fclose(fptr);
         fclose(fptr1);
+
+        //Closing semaphores
+        wait(read_sem);
+        readerCount--;
+
+        if(readerCount == 0)
+            sem_post(write_sem);
+        sem_post(read_sem);
     }
 
     else {
@@ -922,6 +969,8 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
 
     char message[256];
 
+    //Semaphore
+    sem_wait(write_sem);
 
     if(day == 1){
         availableSeats = 20;
@@ -997,6 +1046,9 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
             fclose(fptr1);
             remove("Day1.txt");
             rename("tmp6.txt", "Day1.txt");
+
+            //Closing semaphore
+            sem_post(write_sem);
 
             //REMOVE SEATS FROM ORIGINAL INITIAL SEATS FILE
             GiveSeatsBack(day, input);
@@ -1092,6 +1144,10 @@ void ChangeTravelDay(int day, char input[], int numTravelers, int clientSocket){
             remove("Day2.txt");
             rename("tmp7.txt", "Day2.txt");
 
+            //Closing semaphore
+            sem_post(write_sem);
+
+
             //REMOVE SEATS FROM ORIGINAL INITIAL SEATS FILE
             GiveSeatsBack(day, input);
             RemoveSeats(day, input);
@@ -1129,6 +1185,8 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
 
     char message[256];
+
+    sem_wait(write_sem);
 
     //Added server number and modifications
     int serverNumber;
@@ -1183,8 +1241,12 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 fclose(fptr3);
                 fclose(fptr2);
+
                 remove("Day1.txt");
                 rename("tmp8.txt", "Day1.txt");
+
+                //Closing semaphore
+                sem_post(write_sem);
 
                 //Allow user to pick new seats
                 SeatsAvailable(numOfTravelersModified, input, day, clientSocket);
@@ -1227,8 +1289,12 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
             }
             fclose(fptr2);
             fclose(fptr1);
+
             remove("Day1.txt");
             rename("tmp9.txt", "Day1.txt");
+
+            //Closing sempahore
+            sem_post(write_sem);
 
             if(valid == 1){
                 //Remove as many seats as requested from Seats1_History
@@ -1302,8 +1368,12 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
 
                 fclose(fptr3);
                 fclose(fptr2);
+
                 remove("Day2.txt");
                 rename("tmp8.txt", "Day2.txt");
+
+                //Closing semaphore
+                sem_post(write_sem);
 
                 //Allow user to pick new seats
                 SeatsAvailable(numOfTravelersModified, input, day, clientSocket);
@@ -1347,8 +1417,12 @@ void ChangeNumberTravelers(int day,char input[], int numOfTravelersModified, int
             }
             fclose(fptr2);
             fclose(fptr1);
+
             remove("Day2.txt");
             rename("tmp9.txt", "Day2.txt");
+
+            //Closing semaphore
+            sem_post(write_sem);
 
             if(valid == 1){
                 //Remove as many seats as requested from Seats1_History
@@ -1392,6 +1466,9 @@ void UpdateModificationText(int day, char input[], char newModificationText[]){
     char *modifications[100];
     int serverNumber;
 
+    //Opening semaphore
+    sem_wait(write_sem);
+
     if(day == 1){
         if ((fptr1 = fopen("Day1.txt", "r")) == NULL) {
             printf("Error! Could not open Day1.txt - UpdateModificationText");
@@ -1414,6 +1491,9 @@ void UpdateModificationText(int day, char input[], char newModificationText[]){
         fclose(fptr1);
         remove("Day1.txt");
         rename("tmp10.txt", "Day1.txt");
+
+        //Closing semaphore
+        sem_post(write_sem);
     }
 
     else if(day == 2){
@@ -1438,6 +1518,9 @@ void UpdateModificationText(int day, char input[], char newModificationText[]){
         fclose(fptr1);
         remove("Day2.txt");
         rename("tmp10.txt", "Day2.txt");
+
+        //Closing semaphore
+        sem_post(write_sem);
     }
 }
 

@@ -24,6 +24,8 @@ void RemoveSeats(int day, char input[]){
     //printf("\nCalling from Remove Seats");
     //printf("\nInput received: %s Length: %d", input, strlen(input));
 
+    sem_wait(write_sem);
+
     if(day == 1){
         FILE *intialfptr, *newfptr;
         int seat;
@@ -52,6 +54,9 @@ void RemoveSeats(int day, char input[]){
         //Switch names
         remove("Seats1_History.txt");
         rename("tmp2.txt", "Seats1_History.txt");
+
+        //Closing semaphore
+        sem_post(write_sem);
     }
 
     else if(day == 2){
@@ -82,6 +87,9 @@ void RemoveSeats(int day, char input[]){
         //Switch names
         remove("Seats2_History.txt");
         rename("tmp2.txt", "Seats2_History.txt");
+
+        //Closing semaphore
+        sem_post(write_sem);
     }
     else {
         printf("Remove seats: Not valid day for travel");
@@ -91,6 +99,8 @@ void RemoveSeats(int day, char input[]){
 
 void GiveSeatsBack(int day, char input[]){
     char ticketNumber[10];
+
+    sem_wait(write_sem);
 
     if(day == 1){
         FILE *fptr1, *fptr2, *fptr3;
@@ -143,6 +153,9 @@ void GiveSeatsBack(int day, char input[]){
             rename("tmp3.txt", "Seats1.txt");
         }
         fclose(fptr1);
+
+        //Closing semaphore
+        sem_post(write_sem);
     }
 
     else if(day == 2){
@@ -198,6 +211,9 @@ void GiveSeatsBack(int day, char input[]){
             rename("tmp3.txt", "Seats2.txt");
         }
         fclose(fptr1);
+
+        //Closing sempahore
+        sem_post(write_sem);
     }
 
     else {

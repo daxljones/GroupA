@@ -143,7 +143,7 @@ void DisplaySeats(int dayOfTravel, int clientSocket){
     readerCount++;
     if(readerCount == 1)
         sem_wait(write_sem);
-    
+
     sem_post(read_sem);
 
     //printf("\n\t\tAVAILBLE SEATS    DAY: %d\n\n", dayOfTravel);
@@ -255,6 +255,14 @@ void DisplaySeats(int dayOfTravel, int clientSocket){
         sprintf(message, "\n");
         sendMessage(message, clientSocket);
         fclose(fptr);
+
+        wait(read_sem);
+        readerCount--;
+
+        if(readerCount == 0)
+            sem_post(write_sem);
+
+        sem_post(read_sem);
     }
     else {
         //printf("Invalid day");
