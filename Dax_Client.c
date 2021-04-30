@@ -10,12 +10,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 2220
+#define PORT 2220 //port to connect to server
 
 void readFile(int);
 
 int main()
 {
+    //Set up socket connections
     int clientSocket, ret;
     struct sockaddr_in serverAddr;
 
@@ -43,32 +44,33 @@ int main()
     }
     printf("CONNECTED TO SERVER\n\n");
 
-    char input[256];
-    char re[256];
-    int recieved = 0;
+    char input[256]; // holds user input
+    char re[256]; // holds recieved messages
+    int recieved = 0; //holds message size
+
 
     while(1)
     {
-        while(1)
+        while(1) // loop to recieve until told otherwise instructions
         {
-            if((recieved = recv(clientSocket, re, sizeof(re), 0))  > 0) //recieve client response
+            if((recieved = recv(clientSocket, re, sizeof(re), 0))  > 0) //recieve server message
             {
-                if(strcmp(re, "input") == 0 || strcmp(re, "exit") == 0 || strcmp(re, "file") == 0) //Server needs user input
+                if(strcmp(re, "input") == 0 || strcmp(re, "exit") == 0 || strcmp(re, "file") == 0) // if server sends special signal break
                 {
                     break;
                 }
 
                 fflush(stdout);
-                printf("%s", re);
+                printf("%s", re); // print message
             }
         }
 
-        if(strcmp(re, "exit") == 0)
+        if(strcmp(re, "exit") == 0) // if keyword is exit, leave
         {
             printf("\n\n[+] Client Closing.\n\n");
             return 0;
         }
-        else if(strcmp(re, "file") == 0)
+        else if(strcmp(re, "file") == 0) // if keyword is file, prepare to accept file
         {
             readFile(clientSocket);
             continue;
@@ -77,11 +79,10 @@ int main()
 
         printf("\n");
 
-        fgets(input, sizeof(input), stdin);
+        fgets(input, sizeof(input), stdin); // user to enter input
 
-        printf("\ngoing to send.\n");
         
-        if(send(clientSocket, input, strlen(input) + 1, 0) == -1)
+        if(send(clientSocket, input, strlen(input) + 1, 0) == -1) // send to server
         {
             printf("\n\n[-]Something Failed sending message!\n\n");
         }
@@ -94,21 +95,27 @@ int main()
 }
 
 
+/*
+    void readFile(int): special case in order to accept file and save it
+
+    Parameters:
+        clientSocket: socket to use
+*/
 void readFile(int clientSocket)
 {   
-    char fileName[256];
+    char fileName[256]; // stores file name
 
-    if(recv(clientSocket, fileName, sizeof(fileName), 0)  == -1) //recieve client response
+    if(recv(clientSocket, fileName, sizeof(fileName), 0)  == -1) //recieve file name
     {
         printf("\n\n[-]Something Failed Recieving!\n\n");
         exit(0);
     }
 
 
-    char fileBuffer[5000];
+    char fileBuffer[5000]; // stores file contents
 
 
-    if(recv(clientSocket, fileBuffer, sizeof(fileBuffer), 0)  == -1) //recieve client response
+    if(recv(clientSocket, fileBuffer, sizeof(fileBuffer), 0)  == -1) //recieve file contents
     {
         printf("\n\n[-]Something Failed Recieving!\n\n");
         exit(0);
@@ -116,10 +123,10 @@ void readFile(int clientSocket)
 
     
 
-    FILE *reciept;
+    FILE *reciept; // file pointer
 
-    reciept = fopen(fileName, "w+");
+    reciept = fopen(fileName, "w+"); // creat new file based on file name from server
 
-    fwrite(fileBuffer, sizeof(char), strlen(fileBuffer) + 1, reciept);
-    fclose(reciept);
+    fwrite(fileBuffer, sizeof(char), strlen(fileBuffer) + 1, reciept); // write contents to file
+    fclose(reciept); // close file
 }
