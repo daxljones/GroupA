@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 }
 */
 
-char *code;
+char code[7];
 
 
 
@@ -44,7 +44,7 @@ void MakeReservation(int clientSocket){
             sendMessage(message, clientSocket);
 
 
-            sprintf(code, "/%s", randomTicketGeneration);
+            sprintf(code, "/%s", randomTicketGeneration());
             enterQueue(customer.numOfTravelers, code);
 
             MakingReservation(&customer, clientSocket, code);

@@ -10,7 +10,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 2225
+#define PORT 2220
 
 void readFile(int);
 

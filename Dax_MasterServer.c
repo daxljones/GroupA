@@ -10,7 +10,7 @@ int connectionWithClient(int *);
 void * threadFunc(void *);
 void * masterThread(void *);
 
-#define BASEPORT 2225
+#define BASEPORT 2220
 #define NUM_OF_SERVERS 1
 #define THREAD_NUM 1
 
@@ -358,8 +358,10 @@ void sendFile(char *contents, char *name, int clientSocket)
 void enterQueue(int numOfTickets, char *code)
 {
     int priority;
+            printf("-----DEBUG: %s----\n", code);
     
     pthread_mutex_lock(&pq);
+            printf("-----DEBUG 1 : %s----\n", code);
 
     for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i)
     {
