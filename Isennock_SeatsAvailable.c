@@ -4,15 +4,6 @@
 // risenno@ostatemail.okstate.edu
 
 
-/*
-int main(int argc, char *argv[])
-{
-    //ChooseSeat(14);
-    SeatsAvailable(4, "OSU1234", 1);
-    return 0;
-}
-*/
-
 void SeatsAvailable(int seatsPurchased, char ticketNumber[], int dayOfTravel, int clientSocket){
     int count = 0;
     int seatPicked;

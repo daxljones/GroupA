@@ -5,23 +5,6 @@
 // RYAN ISENNOCK
 // risenno@ostatemail.okstate.edu
 
-/*
-int main()
-{
-    int day = 1;
-    char input[10];
-
-    printf("\nTicket Number: ");
-    scanf(" %s", input);
-
-    //Make sure GiveSeatsBack goes before Remove Seats
-    GiveSeatsBack(day, input);
-    RemoveSeats(day, input);
-
-    return 0;
-}
-*/
-
 
 void RemoveSeats(int day, char input[]){
     char ticketNumber[10];
