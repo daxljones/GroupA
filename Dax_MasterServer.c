@@ -12,8 +12,8 @@ void * threadFunc(void *);
 void * masterThread(void *);
 
 #define BASEPORT 2220 //base port all server will work off of
-#define NUM_OF_SERVERS 1 //num of servers
-#define THREAD_NUM 1 //num of threads for each server
+#define NUM_OF_SERVERS 5 //num of servers
+#define THREAD_NUM 5 //num of threads for each server
 
 pthread_mutex_t lock[NUM_OF_SERVERS]; //mutex lock for each server
 
@@ -404,6 +404,7 @@ void sendFile(char *contents, char *name, int clientSocket)
 */
 void enterQueue(int numOfTickets, char *code)
 {
+    printf("---MADE IT--");
     pthread_mutex_lock(&pq); //accessing list so don't allow anyone else
 
     for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i) // go through array to find first available slot
