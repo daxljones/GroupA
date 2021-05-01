@@ -6,8 +6,8 @@
 //#include <wait.h> //UNCOMMENT THIS INLCUDE IF USING LINUX
 
 //prototypes for server use only
-void server(int); 
-int connectionWithClient(int *);
+void server(int);
+int connectionWithClient(int *, int *);
 void * threadFunc(void *);
 void * masterThread(void *);
 
@@ -39,10 +39,10 @@ int main()
 {
     printf("Master Server starting...\n\n");
 
-    
+
     readerCount = 0; // intializes reader count
 
-    int i = 0; 
+    int i = 0;
     pid_t pid;
 
     //set up semaphores
@@ -75,9 +75,9 @@ int main()
         if(pid == 0)
             server(i);
     }
-    
+
     //wait until all children are done
-    while(wait(NULL) != -1){;} 
+    while(wait(NULL) != -1){;}
 
     //close semaphores
     sem_close(write_sem);
@@ -107,8 +107,8 @@ void server(int portAdd)
     //prepare thread package
     struct threadPackage *tp;
     struct threadPackage package;
-    tp = &package;    
-    
+    tp = &package;
+
     pthread_t *pool = malloc(sizeof(pthread_t) * THREAD_NUM); //declare thread array
     struct queue *q = createQueue(); // create queue
 
@@ -182,19 +182,19 @@ void server(int portAdd)
             printf("Error for new socket\n");
             exit(1);
         }
-        
+
         printf("Connection Accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
 
         int *pclient = malloc(sizeof(int)); // pass socket info to new variable in heap
         *pclient = newSocket;
 
         // add client to queue in controlled lock
-        pthread_mutex_lock(&lock[portAdd]); 
+        pthread_mutex_lock(&lock[portAdd]);
         enqueue(q, pclient);
         pthread_mutex_unlock(&lock[portAdd]);
     }
 
-    
+
     exit(0);
 }
 
@@ -210,7 +210,7 @@ void server(int portAdd)
      void * threadFunc(void *package): Method ran by threads in a pool. Infinitely run checking for new things in queue.
      On client connection, continue on to handling client.
 
-     Parameters: 
+     Parameters:
         void *package: Package sent by Server holding needed info
 */
 void * threadFunc(void *package)
@@ -219,13 +219,19 @@ void * threadFunc(void *package)
 
     struct threadPackage *tp;
     tp = (struct threadPackage *)package; // Cast void * into threadPackage
-    
+
     int *socket;
     int s;
     socket = &s;
-    
+    int *serverNumber;
+
+    int val = tp->serverNum;
+    serverNumber = &val;
+
+    //printf("\nSERVER NO:%d", tp->serverNum);
+
     while(1)
-    {   
+    {
         //Attempt taking connection off queue in controlled access
         pthread_mutex_lock(&lock[tp->serverNum]);
         socket = dequeue(tp->q);
@@ -234,42 +240,43 @@ void * threadFunc(void *package)
 
         if(*socket != -1) //check if anything was pulled off
         {
-            connectionWithClient(socket); // execute handling with clients
+            connectionWithClient(socket, serverNumber); // execute handling with clients
         }
         free(socket); //Free socket since it's not needed
-        
+
     }
 
     return NULL;
 }
 
 
-int connectionWithClient(int *s)
+int connectionWithClient(int *s, int *sN)
 {
     int clientSocket = *s;
+    int serverNumber = *sN;
 
     // intialize menu
-    char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program\n\nOption:\n"; 
+    char menu[] = "\n\n\tMENU\n1. Make a reservation.\n2. Inquiry about the ticket.\n3. Modify the reservation.\n4. Cancel the reservation.\n5. Exit the program\n\nOption:\n";
     char *userChoice; //holds user response
     int choice; // conversion of user response
     char message[256]; // buffer to hold message
 
     while(1)
-    {   
+    {
         sendMessage(menu, clientSocket); // Send menu
 
         userChoice = clientInput(clientSocket); // get user input
-        
+
         choice = atoi(userChoice); //conversion of user choice from string to int
-       
+
         switch (choice) // dictates action based on user choice
         {
              case 1:
-                MakeReservation(clientSocket); // execute making reservation
+                MakeReservation(clientSocket, serverNumber); // execute making reservation
                 break;
 
             case 2:
-                InquiryTicket(clientSocket); //executing inquiry 
+                InquiryTicket(clientSocket); //executing inquiry
                 break;
 
             case 3:
@@ -291,7 +298,7 @@ int connectionWithClient(int *s)
     }
 
     printf("Now leaving...\n\n");
-    
+
     close(clientSocket); // close client socket
 
     return 1;
@@ -331,7 +338,7 @@ char * clientInput(int clientSocket)
     char *clientResponse = malloc(sizeof(char) * 256); // prepare message to be returned
 
     sendMessage("input", clientSocket); // tell client servers is asking for input
-    
+
 
     if(recv(clientSocket, clientResponse, 256, 0)  == -1) //recieve client response
     {
@@ -372,10 +379,10 @@ char * clientInput(int clientSocket)
 void sendFile(char *contents, char *name, int clientSocket)
 {
     sendMessage("file", clientSocket); //tell client tp prepare for file
-    char fileName[100]; 
+    char fileName[100];
     sprintf(fileName, "%sReciept.txt", name); // set up file name
     sendMessage(fileName, clientSocket); //send file name to client
-    
+
     if(send(clientSocket, contents, 5000, 0) == -1) //send file to client
     {
         printf("\n\n[-]Something Failed sending message!\n\n");
@@ -388,7 +395,7 @@ void sendFile(char *contents, char *name, int clientSocket)
 //===============================
 
 /*
-    void enterQueue(int, char *): Enters calling thread into an array based on num of 
+    void enterQueue(int, char *): Enters calling thread into an array based on num of
     passengers as priority and creates semaphore based on thread provided code.
 
     Parameters:
@@ -396,7 +403,7 @@ void sendFile(char *contents, char *name, int clientSocket)
         code: thread provided code to use as semaphore code
 */
 void enterQueue(int numOfTickets, char *code)
-{   
+{
     pthread_mutex_lock(&pq); //accessing list so don't allow anyone else
 
     for(int i = 0; i < (THREAD_NUM * NUM_OF_SERVERS); ++i) // go through array to find first available slot
@@ -408,7 +415,7 @@ void enterQueue(int numOfTickets, char *code)
         }
     }
     //create semaphore based on code
-    sem_t *createsemaphore; 
+    sem_t *createsemaphore;
     sem_unlink(code);
     createsemaphore = sem_open(WRITE, IPC_CREAT, 0660, 0);
 

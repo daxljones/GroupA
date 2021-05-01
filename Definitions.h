@@ -48,8 +48,8 @@ void takeOut(pthread_t);
 void InquiryTicket(int);
 void MakingReservation(struct client *, int, char *);
 void ModifyReservation(int);
-void MakeReservation(int);
-struct client passangerInformation(int);
+void MakeReservation(int, int);
+struct client passangerInformation(int, int);
 void SeatsAvailable(int, char *, int, int);
 char* randomTicketGeneration(void);
 void CancelReservation(int);
@@ -70,9 +70,9 @@ pthread_mutex_t pq;
 
 #include "Dax_Queue.c"
 #include "Dax_ReadWriteSync.c"
-#include "readingInformation.c"
-#include "RetrievingSeats.c"
-#include "SeatsAvailable.c"
+#include "Ayrton_ReadingInformation.c"
+#include "Isennock_RetrievingSeats.c"
+#include "Isennock_SeatsAvailable.c"
 
 
 #endif
