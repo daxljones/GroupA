@@ -5,23 +5,10 @@
 // This file was modified by all three members
 // (About 1,100 lines) Ayrton implemented reading and writing system to summary files
 // (About 250 lines) Dax implemented message passing lines between client and server
-// (About 200 lines) Ryan implemented semaphores and modified text for the modifications field
+// (About 200 lines) Ryan added semaphores and modified text for the modifications field
 
 #include "Definitions.h"
 
-/*
-int main(int argc, char *argv[])
-{
-    //struct client customer;
-    //customer = passangerInformation();
-    //MakingReservation(&customer);
-
-    //InquiryTicket();
-    MakeReservation();
-
-    return 0;
-}
-*/
 
 char code[7];
 
@@ -249,12 +236,11 @@ void MakingReservation(struct client *customer, int clientSocket, char *code){
     strcpy(ticketNumber, ticketPtr);
     ticketNumber[strlen(ticketNumber) + 1] = '\0';
 
-    //char ticketNumber[] = "OSU1234";
     sem_t *mysem;
     mysem = sem_open(code, 0, 0660, 0);
     sem_wait(mysem);
 
-    //-------------PUT WRITE SEMAPHORE HERE--------------------
+
     sem_wait(write_sem);
 
     sem_unlink(code);
